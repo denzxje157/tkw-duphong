@@ -43,6 +43,8 @@ body {
   color: var(--text-main);
   line-height: 1.5;
   min-height: 100vh;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 /* --- APP LAYOUT --- */
@@ -1257,6 +1259,237 @@ body {
 }
 
 /* ==============================================================================
+ * CƠ CHẾ HIỂN THỊ ĐA NỀN TẢNG (DESKTOP TABLE VS SMARTPHONE CARDS)
+ * ==============================================================================
+ */
+
+/* Mặc định trên Máy tính / Laptop: Hiển thị dạng Bảng chuẩn */
+.urgent-desktop-table,
+.inventory-desktop-table,
+.suppliers-desktop-table {
+  display: block;
+  width: 100%;
+}
+
+.urgent-mobile-list,
+.inventory-mobile-list,
+.suppliers-mobile-list {
+  display: none;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+}
+
+/* Thẻ Card cho Smartphone (Native Mobile App Card UI) */
+.mobile-item-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 14px 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.mobile-item-card:active {
+  transform: scale(0.99);
+}
+
+.mobile-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.mobile-sku-badge {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--primary);
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  padding: 3px 8px;
+  border-radius: 6px;
+  letter-spacing: 0.5px;
+}
+
+.mobile-location-tag {
+  font-size: 12px;
+  color: #475569;
+  background: #f1f5f9;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.mobile-item-title {
+  font-size: 15px;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+  line-height: 1.35;
+}
+
+.mobile-item-sub {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.mobile-item-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px 12px;
+  background: #f8fafc;
+  padding: 10px 12px;
+  border-radius: 8px;
+  font-size: 12.5px;
+  border: 1px solid #f1f5f9;
+}
+
+.mobile-item-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.mobile-item-actions .btn {
+  flex: 1;
+  padding: 9px 8px;
+  font-size: 12.5px;
+  font-weight: 600;
+}
+
+/* Hàng nút liên hệ nhanh cho Nhà cung cấp trên di động */
+.mobile-contact-pill-row {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mobile-contact-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 12px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  border-radius: 20px;
+  font-size: 12px;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.mobile-contact-pill:hover {
+  background: #dcfce7;
+}
+
+/* ==============================================================================
+ * BIỂU ĐỒ DONUT HIỆN ĐẠI (CANVAS + LEGEND + PROGRESS BAR)
+ * ==============================================================================
+ */
+.donut-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.donut-center-wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 8px 0;
+  position: relative;
+}
+
+.donut-legend-modern {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.donut-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid #f1f5f9;
+  font-size: 12.5px;
+  transition: all 0.2s ease;
+}
+
+.donut-pill:hover {
+  background: #f1f5f9;
+  transform: translateX(2px);
+}
+
+.donut-pill .dot-indicator {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  display: inline-block;
+  margin-right: 8px;
+  flex-shrink: 0;
+}
+
+.donut-pill .dot-indicator.green { background-color: #10b981; box-shadow: 0 0 6px rgba(16, 185, 129, 0.5); }
+.donut-pill .dot-indicator.yellow { background-color: #f59e0b; box-shadow: 0 0 6px rgba(245, 158, 11, 0.5); }
+.donut-pill .dot-indicator.red { background-color: #ef4444; box-shadow: 0 0 6px rgba(239, 68, 68, 0.5); }
+
+.donut-pill .pill-name {
+  flex: 1;
+  color: #334155;
+  font-weight: 500;
+}
+
+.donut-pill strong {
+  font-size: 14px;
+  color: #0f172a;
+  margin-right: 6px;
+}
+
+.donut-pill .pill-pct {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-weight: 600;
+}
+
+/* Thanh Tỷ Lệ Cơ Cấu Tồn Kho An Toàn */
+.ratio-progress-bar {
+  display: flex;
+  height: 8px;
+  width: 100%;
+  border-radius: 999px;
+  overflow: hidden;
+  background: #e2e8f0;
+  margin-top: 14px;
+}
+
+.ratio-fill {
+  height: 100%;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.ratio-fill.green { background-color: #10b981; }
+.ratio-fill.yellow { background-color: #f59e0b; }
+.ratio-fill.red { background-color: #ef4444; }
+
+/* Canvas Responsive Container */
+.canvas-responsive-container {
+  width: 100%;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+/* ==============================================================================
  * MOBILE APP RESPONSIVE DESIGN SYSTEM (Tương Thích Smartphone & Tablet)
  * Chuẩn Native Mobile App UI/UX & Touch Targets (WCAG AAA)
  * ==============================================================================
@@ -1616,6 +1849,19 @@ html, body {
   .backup-btn-group .btn {
     width: 100% !important;
     justify-content: center;
+  }
+
+  /* ẨN BẢNG DỮ LIỆU DESKTOP VÀ HIỆN THẺ CARD TRÊN SMARTPHONE */
+  .urgent-desktop-table,
+  .inventory-desktop-table,
+  .suppliers-desktop-table {
+    display: none !important;
+  }
+
+  .urgent-mobile-list,
+  .inventory-mobile-list,
+  .suppliers-mobile-list {
+    display: flex !important;
   }
 
   .card-header {

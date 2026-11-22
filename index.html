@@ -76,7 +76,9 @@
               <h3 class="card-title" style="font-size: 15px;">⚠️ Danh Sách Vật Tư Sắp Hết Hoặc Dưới Định Mức Tối Thiểu</h3>
               <span class="badge badge-warning" id="warning-count-badge" style="font-size: 11px;">0 mục cần chú ý</span>
             </div>
-            <div class="table-responsive" style="max-height: 275px; overflow-y: auto;">
+
+            <!-- CHẾ ĐỘ XEM BẢNG CHO DESKTOP -->
+            <div class="table-responsive urgent-desktop-table" style="max-height: 275px; overflow-y: auto;">
               <table class="table" style="font-size: 12.5px;">
                 <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 2;">
                   <tr>
@@ -94,29 +96,47 @@
                 </tbody>
               </table>
             </div>
+
+            <!-- CHẾ ĐỘ XEM THẺ CHO SMARTPHONE (KHÔNG BỊ CẮT CỘT, DỄ BẤM NHẬP HÀNG) -->
+            <div class="urgent-mobile-list" id="urgent-mobile-list">
+              <!-- Dữ liệu JS render -->
+            </div>
           </div>
 
-          <!-- BIỂU ĐỒ TRÒN TỶ LỆ CƠ CẤU TỒN KHO (HTML5 CANVAS) -->
-          <div class="card" style="margin-bottom: 0;">
+          <!-- BIỂU ĐỒ TRÒN TỶ LỆ CƠ CẤU TỒN KHO (HTML5 CANVAS REALTIME) -->
+          <div class="card donut-card" style="margin-bottom: 0;">
             <div class="card-header" style="margin-bottom: 12px; padding-bottom: 8px;">
               <h3 class="card-title" style="font-size: 15px;">📊 Phân Bổ Tồn Kho</h3>
+              <span class="badge badge-success" style="font-size: 11px;">⚡ Realtime</span>
             </div>
-            <div style="text-align: center; padding: 4px 0;">
-              <canvas id="donutChart" width="200" height="200"></canvas>
+            <div class="donut-center-wrapper">
+              <canvas id="donutChart" width="220" height="220"></canvas>
             </div>
-            <div style="margin-top: 10px; font-size: 12px; display: flex; flex-direction: column; gap: 6px;">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span><span style="display: inline-block; width: 10px; height: 10px; background: #10b981; border-radius: 2px; margin-right: 6px;"></span>Còn hàng:</span>
+            <div class="donut-legend-modern">
+              <div class="donut-pill in-stock">
+                <span class="dot-indicator green"></span>
+                <span class="pill-name">Còn hàng:</span>
                 <strong id="legend-in-stock">0</strong>
+                <span class="pill-pct" id="pct-in-stock">(0%)</span>
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span><span style="display: inline-block; width: 10px; height: 10px; background: #f59e0b; border-radius: 2px; margin-right: 6px;"></span>Sắp hết:</span>
+              <div class="donut-pill low-stock">
+                <span class="dot-indicator yellow"></span>
+                <span class="pill-name">Sắp hết:</span>
                 <strong id="legend-low-stock">0</strong>
+                <span class="pill-pct" id="pct-low-stock">(0%)</span>
               </div>
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <span><span style="display: inline-block; width: 10px; height: 10px; background: #ef4444; border-radius: 2px; margin-right: 6px;"></span>Hết hàng:</span>
+              <div class="donut-pill out-stock">
+                <span class="dot-indicator red"></span>
+                <span class="pill-name">Hết hàng:</span>
                 <strong id="legend-out-stock">0</strong>
+                <span class="pill-pct" id="pct-out-stock">(0%)</span>
               </div>
+            </div>
+            <!-- Thanh Tỷ Lệ An Toàn Kho -->
+            <div class="ratio-progress-bar" title="Thanh tỷ lệ cơ cấu tồn kho an toàn">
+              <div class="ratio-fill green" id="bar-in-stock" style="width: 0%;"></div>
+              <div class="ratio-fill yellow" id="bar-low-stock" style="width: 0%;"></div>
+              <div class="ratio-fill red" id="bar-out-stock" style="width: 0%;"></div>
             </div>
           </div>
         </div>

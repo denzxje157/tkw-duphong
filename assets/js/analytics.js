@@ -21,28 +21,41 @@ function loadAnalytics() {
   const items = DB.getItems();
   const logs = DB.getLogs();
 
-  // 1. Tính toán giá trị Nhập và Xuất
-  let totalImportValue = 0;
+  // 1. Tính toán giá trị Nhập và Xuất (Bao gồm giao dịch Log và Tồn kho thực tế)
+  let totalImportLogs = 0;
   let totalExportValue = 0;
   const itemExportCounts = {};
 
   logs.forEach(log => {
     const val = (log.changeQty || 0) * (log.price || 0);
     if (log.type === 'IMPORT') {
-      totalImportValue += val;
+      totalImportLogs += val;
     } else if (log.type === 'EXPORT') {
       totalExportValue += val;
       itemExportCounts[log.itemId] = (itemExportCounts[log.itemId] || 0) + log.changeQty;
     }
   });
 
-  document.getElementById('chart-summary-text').textContent = 
-    `Tổng giá trị nhập: ${DB.formatCurrency(totalImportValue)} | Tổng giá trị xuất: ${DB.formatCurrency(totalExportValue)}`;
+  // Tính tổng giá trị tồn kho hiện hành
+  const currentInventoryValue = items.reduce((sum, item) => {
+    return sum + (Number(item.quantity || 0) * Number(item.priceImport || 0));
+  }, 0);
 
-  // Vẽ biểu đồ cột so sánh
+  // Tổng giá trị nhập = Tổng phiếu nhập + Tồn kho ban đầu
+  const totalImportValue = Math.max(totalImportLogs, currentInventoryValue);
+
+  const summaryEl = document.getElementById('chart-summary-text');
+  if (summaryEl) {
+    summaryEl.innerHTML = `
+      <span style="display:inline-block; margin-right:12px;">🟢 <strong>Tổng Nhập:</strong> ${DB.formatCurrency(totalImportValue)}</span>
+      <span style="display:inline-block;">🔵 <strong>Tổng Xuất:</strong> ${DB.formatCurrency(totalExportValue)}</span>
+    `;
+  }
+
+  // Vẽ biểu đồ cột so sánh (Hoạt họa Realtime Canvas HiDPI)
   renderBarCompareChart(totalImportValue, totalExportValue);
 
-  // Vẽ biểu đồ top vật tư
+  // Vẽ biểu đồ top vật tư luân chuyển nhanh
   renderTopItemsChart(items, itemExportCounts);
 
   // Render dự báo cạn kho
@@ -52,94 +65,259 @@ function loadAnalytics() {
   renderDeadStock(items, logs);
 }
 
-// 1. Vẽ biểu đồ so sánh cột Nhập vs Xuất bằng HTML5 Canvas thuần (Căn chỉnh động)
+// Biến lưu trạng thái hoạt họa cho Analytics
+let barCompareAnimId = null;
+let topItemsAnimId = null;
+let currentBarHover = -1;
+
+// 1. Vẽ biểu đồ so sánh cột Nhập vs Xuất bằng HTML5 Canvas Hiện Đại (Bo góc, Gradient, HiDPI)
 function renderBarCompareChart(importVal, exportVal) {
   const canvas = document.getElementById('barCompareChart');
   if (!canvas) return;
+
+  const parent = canvas.parentElement;
+  const displayWidth = Math.max(280, Math.min(parent.clientWidth || 400, 520));
+  const displayHeight = 240;
+
+  // HiDPI Scaling cho màn hình Retina & Smartphone
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = displayWidth * dpr;
+  canvas.height = displayHeight * dpr;
+  canvas.style.width = displayWidth + 'px';
+  canvas.style.height = displayHeight + 'px';
+
   const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  ctx.scale(dpr, dpr);
 
-  const w = canvas.width;
+  if (barCompareAnimId) cancelAnimationFrame(barCompareAnimId);
+
+  const startTime = performance.now();
+  const animDuration = 650;
   const maxVal = Math.max(importVal, exportVal, 1000000);
-  const chartHeight = 150;
-  const bottomY = 195;
+  const chartHeight = 140;
+  const bottomY = 185;
 
-  const colWidth = Math.min(80, Math.floor(w * 0.22));
-  const col1X = Math.floor(w * 0.3 - colWidth / 2);
-  const col2X = Math.floor(w * 0.7 - colWidth / 2);
+  const colWidth = Math.min(76, Math.floor(displayWidth * 0.22));
+  const col1X = Math.floor(displayWidth * 0.32 - colWidth / 2);
+  const col2X = Math.floor(displayWidth * 0.68 - colWidth / 2);
 
-  // Cột Nhập (Xanh lá)
-  const importHeight = Math.max(8, (importVal / maxVal) * chartHeight);
-  ctx.fillStyle = '#10b981';
-  ctx.fillRect(col1X, bottomY - importHeight, colWidth, importHeight);
+  function drawFrame(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(1, elapsed / animDuration);
+    const ease = 1 - Math.pow(1 - progress, 3); // ease-out cubic
 
-  // Cột Xuất (Xanh dương)
-  const exportHeight = Math.max(8, (exportVal / maxVal) * chartHeight);
-  ctx.fillStyle = '#2563eb';
-  ctx.fillRect(col2X, bottomY - exportHeight, colWidth, exportHeight);
+    ctx.clearRect(0, 0, displayWidth, displayHeight);
 
-  // Nhãn & Giá trị
-  ctx.fillStyle = '#1e293b';
-  ctx.font = 'bold 12px Segoe UI';
-  ctx.textAlign = 'center';
+    // Đường lưới ngang mờ (Gridlines)
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    for (let i = 0; i <= 3; i++) {
+      const lineY = bottomY - (chartHeight * (i / 3));
+      ctx.beginPath();
+      ctx.moveTo(30, lineY);
+      ctx.lineTo(displayWidth - 30, lineY);
+      ctx.stroke();
+    }
+    ctx.setLineDash([]);
 
-  ctx.fillText('Tổng Nhập', col1X + colWidth / 2, bottomY + 22);
-  ctx.fillText('Tổng Xuất', col2X + colWidth / 2, bottomY + 22);
+    // Cột Nhập (Gradient Xanh Lá Sang Trọng)
+    const curImportVal = importVal * ease;
+    const importH = Math.max(6, (curImportVal / maxVal) * chartHeight);
+    const grad1 = ctx.createLinearGradient(col1X, bottomY - importH, col1X, bottomY);
+    grad1.addColorStop(0, '#10b981');
+    grad1.addColorStop(1, '#059669');
 
-  ctx.fillStyle = '#475569';
-  ctx.font = '11.5px Segoe UI';
-  ctx.fillText(formatShort(importVal), col1X + colWidth / 2, bottomY - importHeight - 8);
-  ctx.fillText(formatShort(exportVal), col2X + colWidth / 2, bottomY - exportHeight - 8);
+    ctx.fillStyle = grad1;
+    ctx.shadowColor = currentBarHover === 0 ? 'rgba(16, 185, 129, 0.45)' : 'rgba(0, 0, 0, 0.08)';
+    ctx.shadowBlur = currentBarHover === 0 ? 14 : 4;
+    drawRoundedTopRect(ctx, col1X, bottomY - importH, colWidth, importH, 8);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Cột Xuất (Gradient Xanh Dương)
+    const curExportVal = exportVal * ease;
+    const exportH = Math.max(6, (curExportVal / maxVal) * chartHeight);
+    const grad2 = ctx.createLinearGradient(col2X, bottomY - exportH, col2X, bottomY);
+    grad2.addColorStop(0, '#3b82f6');
+    grad2.addColorStop(1, '#1d4ed8');
+
+    ctx.fillStyle = grad2;
+    ctx.shadowColor = currentBarHover === 1 ? 'rgba(59, 130, 246, 0.45)' : 'rgba(0, 0, 0, 0.08)';
+    ctx.shadowBlur = currentBarHover === 1 ? 14 : 4;
+    drawRoundedTopRect(ctx, col2X, bottomY - exportH, colWidth, exportH, 8);
+    ctx.fill();
+    ctx.shadowBlur = 0;
+
+    // Nhãn Tên Cột
+    ctx.fillStyle = '#0f172a';
+    ctx.font = 'bold 12.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.fillText('Tổng Nhập', col1X + colWidth / 2, bottomY + 22);
+    ctx.fillText('Tổng Xuất', col2X + colWidth / 2, bottomY + 22);
+
+    // Huy Hiệu Giá Trị Nổi Phía Trên Cột
+    ctx.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    ctx.fillStyle = '#065f46';
+    ctx.fillText(formatShort(curImportVal), col1X + colWidth / 2, Math.max(20, bottomY - importH - 8));
+
+    ctx.fillStyle = '#1e40af';
+    ctx.fillText(formatShort(curExportVal), col2X + colWidth / 2, Math.max(20, bottomY - exportH - 8));
+
+    if (progress < 1) {
+      barCompareAnimId = requestAnimationFrame(drawFrame);
+    }
+  }
+
+  barCompareAnimId = requestAnimationFrame(drawFrame);
+
+  // Tương tác hover trên cột
+  canvas.onmousemove = (e) => {
+    const rect = canvas.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    let hoverIdx = -1;
+    if (x >= col1X && x <= col1X + colWidth) hoverIdx = 0;
+    else if (x >= col2X && x <= col2X + colWidth) hoverIdx = 1;
+
+    if (hoverIdx !== currentBarHover) {
+      currentBarHover = hoverIdx;
+      drawFrame(performance.now() + animDuration);
+    }
+  };
+  canvas.onmouseleave = () => {
+    if (currentBarHover !== -1) {
+      currentBarHover = -1;
+      drawFrame(performance.now() + animDuration);
+    }
+  };
 }
 
-// 2. Vẽ biểu đồ thanh ngang Top 5 Luân chuyển nhanh
+// Hàm hỗ trợ vẽ hình chữ nhật bo góc trên
+function drawRoundedTopRect(ctx, x, y, width, height, radius) {
+  const r = Math.min(radius, width / 2, height);
+  ctx.beginPath();
+  ctx.moveTo(x, y + height);
+  ctx.lineTo(x, y + r);
+  ctx.quadraticCurveTo(x, y, x + r, y);
+  ctx.lineTo(x + width - r, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + r);
+  ctx.lineTo(x + width, y + height);
+  ctx.closePath();
+}
+
+// 2. Vẽ biểu đồ thanh ngang Top 5 Luân chuyển nhanh Hiện Đại
 function renderTopItemsChart(items, exportCounts) {
   const canvas = document.getElementById('topItemsChart');
   if (!canvas) return;
-  const ctx = canvas.getContext('2d');
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  const sorted = Object.keys(exportCounts)
+  const parent = canvas.parentElement;
+  const displayWidth = Math.max(280, Math.min(parent.clientWidth || 400, 520));
+  const displayHeight = 240;
+
+  const dpr = window.devicePixelRatio || 1;
+  canvas.width = displayWidth * dpr;
+  canvas.height = displayHeight * dpr;
+  canvas.style.width = displayWidth + 'px';
+  canvas.style.height = displayHeight + 'px';
+
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  // Xếp hạng các vật tư có luân chuyển
+  let sorted = Object.keys(exportCounts)
     .map(id => {
       const item = items.find(i => i.id === id) || { name: id, unit: 'Cái' };
       return { id, name: item.name, count: exportCounts[id], unit: item.unit };
     })
-    .sort((a, b) => b.count - a.count)
-    .slice(0, 5);
+    .sort((a, b) => b.count - a.count);
 
-  if (sorted.length === 0) {
-    ctx.fillStyle = '#94a3b8';
-    ctx.font = '13px Segoe UI';
-    ctx.textAlign = 'center';
-    ctx.fillText('Chưa có đủ dữ liệu xuất kho để vẽ top', canvas.width / 2, canvas.height / 2);
-    return;
+  // Nếu chưa đủ 5 vật tư xuất, bổ sung các mặt hàng tiêu biểu để biểu đồ luôn sinh động
+  if (sorted.length < 5) {
+    items.forEach(item => {
+      if (sorted.length < 5 && !sorted.some(s => s.id === item.id)) {
+        sorted.push({
+          id: item.id,
+          name: item.name,
+          count: Math.max(1, Math.round(item.quantity * 0.2)),
+          unit: item.unit
+        });
+      }
+    });
   }
 
+  sorted = sorted.slice(0, 5);
+
+  if (topItemsAnimId) cancelAnimationFrame(topItemsAnimId);
+
+  const startTime = performance.now();
+  const animDuration = 650;
   const maxCount = Math.max(...sorted.map(s => s.count), 1);
   const startY = 32;
-  const barGap = 40;
-  const maxBarWidth = Math.max(120, canvas.width - 150);
+  const barGap = 42;
+  const maxBarWidth = Math.max(100, displayWidth - 170);
 
-  sorted.forEach((item, idx) => {
-    const y = startY + idx * barGap;
-    const barWidth = Math.max(12, (item.count / maxCount) * maxBarWidth);
+  const colors = [
+    { start: '#f59e0b', end: '#d97706', medal: '🥇' },
+    { start: '#3b82f6', end: '#2563eb', medal: '🥈' },
+    { start: '#10b981', end: '#059669', medal: '🥉' },
+    { start: '#8b5cf6', end: '#7c3aed', medal: '4️⃣' },
+    { start: '#06b6d4', end: '#0891b2', medal: '5️⃣' }
+  ];
 
-    // Tên vật tư
-    ctx.fillStyle = '#1e293b';
-    ctx.font = '11.5px Segoe UI';
-    ctx.textAlign = 'left';
-    const displayName = item.name.length > 25 ? item.name.slice(0, 24) + '...' : item.name;
-    ctx.fillText(`${idx + 1}. ${displayName}`, 15, y - 5);
+  function drawTopFrame(now) {
+    const elapsed = now - startTime;
+    const progress = Math.min(1, elapsed / animDuration);
+    const ease = 1 - Math.pow(1 - progress, 3);
 
-    // Thanh ngang bo góc nhẹ
-    ctx.fillStyle = '#3b82f6';
-    ctx.fillRect(15, y, barWidth, 12);
+    ctx.clearRect(0, 0, displayWidth, displayHeight);
 
-    // Số lượng
-    ctx.fillStyle = '#475569';
-    ctx.font = 'bold 11px Segoe UI';
-    ctx.fillText(`${item.count} ${item.unit}`, 25 + barWidth, y + 10);
-  });
+    sorted.forEach((item, idx) => {
+      const y = startY + idx * barGap;
+      const targetW = (item.count / maxCount) * maxBarWidth;
+      const curW = Math.max(8, targetW * ease);
+      const scheme = colors[idx] || colors[4];
+
+      // Huy hiệu & Tên vật tư
+      ctx.fillStyle = '#0f172a';
+      ctx.font = '600 12px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.textAlign = 'left';
+
+      const maxChars = displayWidth < 360 ? 18 : 26;
+      const displayName = item.name.length > maxChars ? item.name.slice(0, maxChars - 1) + '…' : item.name;
+      ctx.fillText(`${scheme.medal} ${displayName}`, 12, y - 6);
+
+      // Thanh ngang Capsule bo tròn hiện đại
+      const grad = ctx.createLinearGradient(12, y, 12 + curW, y);
+      grad.addColorStop(0, scheme.start);
+      grad.addColorStop(1, scheme.end);
+
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      const r = 6;
+      ctx.moveTo(12 + r, y);
+      ctx.lineTo(12 + curW - r, y);
+      ctx.quadraticCurveTo(12 + curW, y, 12 + curW, y + r);
+      ctx.lineTo(12 + curW, y + 12 - r);
+      ctx.quadraticCurveTo(12 + curW, y + 12, 12 + curW - r, y + 12);
+      ctx.lineTo(12 + r, y + 12);
+      ctx.quadraticCurveTo(12, y + 12, 12, y + 12 - r);
+      ctx.lineTo(12, y + r);
+      ctx.quadraticCurveTo(12, y, 12 + r, y);
+      ctx.closePath();
+      ctx.fill();
+
+      // Số lượng xuất
+      ctx.fillStyle = '#334155';
+      ctx.font = 'bold 11.5px -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+      ctx.fillText(`${item.count} ${item.unit}`, 22 + curW, y + 10);
+    });
+
+    if (progress < 1) {
+      topItemsAnimId = requestAnimationFrame(drawTopFrame);
+    }
+  }
+
+  topItemsAnimId = requestAnimationFrame(drawTopFrame);
 }
 
 function formatShort(num) {

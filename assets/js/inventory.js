@@ -109,6 +109,38 @@ function renderInventoryTable() {
       </tr>
     `;
   }).join('');
+
+  // Render danh sách thẻ card tối ưu cho Smartphone
+  const mobileList = document.getElementById('inventory-mobile-list');
+  if (mobileList) {
+    mobileList.innerHTML = filtered.map(item => {
+      const status = DB.getItemStatus(item.quantity, item.minThreshold);
+      return `
+        <div class="mobile-item-card">
+          <div class="mobile-card-header">
+            <div style="display:flex; align-items:center; gap:6px;">
+              <span class="mobile-sku-badge">${item.id}</span>
+              <span class="badge ${status.badgeClass}">${status.label}</span>
+            </div>
+            <span class="mobile-location-tag">📍 ${item.location || 'Kệ A'}</span>
+          </div>
+          <h4 class="mobile-item-title">${item.name}</h4>
+          <div class="mobile-item-sub">${item.category} • ${item.warehouse}</div>
+          <div class="mobile-item-meta-grid">
+            <div>Tồn: <strong style="color: ${status.colorHex};">${item.quantity} ${item.unit}</strong></div>
+            <div>Định mức: <strong>${item.minThreshold} ${item.unit}</strong></div>
+            <div>Giá bán: <strong>${DB.formatCurrency(item.priceExport)}</strong></div>
+            <div>Giá nhập: <strong>${DB.formatCurrency(item.priceImport)}</strong></div>
+          </div>
+          <div class="mobile-item-actions">
+            <button class="btn btn-outline btn-sm" onclick="openEditModal('${item.id}')">✏️ Sửa</button>
+            <button class="btn btn-danger btn-sm" onclick="confirmDeleteItem('${item.id}')" ${item.quantity > 0 ? 'disabled' : ''}>🗑️ Xóa</button>
+            <button class="btn btn-primary btn-sm" onclick="triggerScanItem('${item.barcode || item.id}')">📷 Quét</button>
+          </div>
+        </div>
+      `;
+    }).join('');
+  }
 }
 
 // Modal Thêm / Sửa
@@ -182,7 +214,24 @@ function handleSaveItem(e) {
     location
   };
 
-  DB.saveItem(itemData);
+  const isNew = !id;
+  const saved = DB.saveItem(itemData);
+
+  // Nếu thêm mới vật tư và có số lượng tồn kho > 0, tự động ghi nhận phiếu Nhập kho ban đầu
+  if (isNew && quantity > 0) {
+    DB.addLog({
+      type: 'IMPORT',
+      itemId: saved.id,
+      itemName: saved.name,
+      changeQty: quantity,
+      balanceAfter: quantity,
+      price: priceImport,
+      partnerName: 'Tồn đầu kỳ / Nhập ban đầu',
+      reason: 'Khởi tạo danh mục vật tư mới',
+      operator: 'Nguyễn Hoàng Anh'
+    });
+  }
+
   DB.showToast(id ? 'Cập nhật vật tư thành công!' : 'Thêm vật tư mới thành công!', 'success');
   closeModal();
   renderInventoryTable();
