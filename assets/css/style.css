@@ -1110,3 +1110,482 @@ body {
   background: var(--primary);
   color: #fff;
 }
+
+/* ==============================================================================
+ * MOBILE APP RESPONSIVE DESIGN SYSTEM (Tương Thích Smartphone & Tablet)
+ * Chuẩn Native Mobile App UI/UX & Touch Targets (WCAG AAA)
+ * ==============================================================================
+ */
+
+/* Nút Hamburger menu trên Header */
+.mobile-menu-toggle {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 4px;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  background: #f1f5f9;
+  border: 1px solid var(--border-color);
+  cursor: pointer;
+  padding: 8px;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+}
+
+.mobile-menu-toggle:hover {
+  background: #e2e8f0;
+}
+
+.mobile-menu-toggle span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background-color: var(--text-main);
+  border-radius: 2px;
+}
+
+/* Nút đóng Sidebar Drawer */
+.sidebar-close-btn {
+  display: none;
+  background: transparent;
+  border: none;
+  color: #cbd5e1;
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 8px;
+  margin-left: auto;
+  line-height: 1;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.sidebar-close-btn:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Lớp phủ Backdrop khi mở Drawer trên điện thoại */
+.sidebar-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  z-index: 998;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.sidebar-backdrop.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* Thanh Bottom Navigation chuẩn Mobile App */
+.mobile-bottom-nav {
+  display: none;
+}
+
+/* Khoá cuộn trang khi mở drawer */
+body.sidebar-locked {
+  overflow: hidden !important;
+}
+
+/* --- TABLET & MOBILE BREAKPOINT (<= 992px) --- */
+@media screen and (max-width: 992px) {
+  /* Biến Sidebar thành Drawer trượt từ bên trái sang */
+  .app-sidebar {
+    position: fixed;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 280px;
+    max-width: 82vw;
+    z-index: 1000;
+    transform: translateX(-100%);
+    transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    box-shadow: none;
+  }
+
+  .app-sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.45);
+  }
+
+  .sidebar-close-btn {
+    display: block;
+  }
+
+  .mobile-menu-toggle {
+    display: flex;
+  }
+
+  /* Main content chiếm trọn chiều rộng */
+  .app-main {
+    margin-left: 0 !important;
+    width: 100%;
+    min-width: 0;
+    padding-bottom: 74px; /* Chừa khoảng trống cho Bottom Bar */
+  }
+
+  .page-content {
+    padding: 16px 14px;
+  }
+
+  /* Header tối ưu cho tablet & mobile */
+  .app-header {
+    padding: 10px 14px;
+    gap: 10px;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+  }
+
+  .header-title-box {
+    min-width: 0;
+  }
+
+  .page-main-title {
+    font-size: 15px !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .page-desc {
+    display: none;
+  }
+
+  .warehouse-badge {
+    display: none;
+  }
+
+  .header-clock {
+    display: none;
+  }
+
+  .user-info {
+    display: none;
+  }
+
+  .header-user {
+    gap: 0;
+  }
+
+  .iot-scanner-trigger-btn {
+    padding: 6px 10px !important;
+    font-size: 12px !important;
+  }
+
+  /* Kích hoạt thanh điều hướng Mobile App dưới đáy */
+  .mobile-bottom-nav {
+    display: flex;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 58px;
+    background: #0f172a;
+    border-top: 1px solid #1e293b;
+    z-index: 950;
+    align-items: stretch;
+    justify-content: space-around;
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.25);
+  }
+
+  .mobile-nav-link {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #94a3b8;
+    text-decoration: none;
+    font-size: 10.5px;
+    font-weight: 500;
+    transition: all 0.15s ease;
+    gap: 2px;
+  }
+
+  .mobile-nav-link .m-icon {
+    font-size: 18px;
+    line-height: 1;
+  }
+
+  .mobile-nav-link.active {
+    color: #38bdf8;
+    font-weight: 700;
+  }
+
+  .mobile-nav-link.active .m-icon {
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 6px rgba(56, 189, 248, 0.6));
+  }
+
+  /* Rack Heatmap chuyển sang 3 cột trên tablet */
+  .rack-grid {
+    grid-template-columns: repeat(3, 1fr) !important;
+  }
+}
+
+/* --- SMARTPHONE BREAKPOINT (<= 768px) --- */
+@media screen and (max-width: 768px) {
+  /* Tối ưu cảm ứng ngón tay (Touch targets) */
+  .btn, .form-control, .view-toggle-btn {
+    min-height: 42px;
+  }
+
+  /* Tránh iOS Safari tự động zoom in khi focus vào input */
+  input[type="text"],
+  input[type="number"],
+  input[type="date"],
+  select,
+  textarea {
+    font-size: 15px !important;
+  }
+
+  /* KPI Cards chuyển sang 2 cột */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+    margin-bottom: 16px;
+  }
+
+  .kpi-card {
+    padding: 12px 14px;
+  }
+
+  .kpi-value {
+    font-size: 18px;
+  }
+
+  .kpi-info h4 {
+    font-size: 11px;
+    margin-bottom: 2px;
+  }
+
+  .kpi-icon {
+    width: 38px;
+    height: 38px;
+    font-size: 18px;
+    border-radius: 10px;
+  }
+
+  /* Rack Heatmap chuyển sang 2 cột */
+  .rack-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  .rack-shelf {
+    padding: 10px !important;
+  }
+
+  /* Form & Bộ lọc chuyển sang 1 cột dạng danh sách */
+  .filter-grid,
+  .form-grid,
+  .stat-boxes {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  .card-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .card-header .card-actions {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+  }
+
+  /* Tối ưu Banner Barcode IoT trên inventory.html */
+  .inventory-iot-banner {
+    padding: 14px !important;
+  }
+
+  .inventory-iot-grid {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* Bảng dữ liệu tự động cuộn ngang mượt mà */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+  }
+
+  .table {
+    min-width: 600px;
+    font-size: 12.5px;
+  }
+
+  .table th, .table td {
+    padding: 9px 10px;
+  }
+
+  /* Modal trên di động: Full màn hình hoặc Bottom Sheet */
+  .modal-overlay {
+    padding: 10px;
+    align-items: flex-end;
+  }
+
+  .modal-box {
+    width: 100% !important;
+    max-width: 100% !important;
+    max-height: 90vh !important;
+    border-radius: 16px 16px 0 0 !important;
+    margin: 0 !important;
+  }
+
+  .modal-header {
+    padding: 14px 16px !important;
+  }
+
+  .modal-body {
+    padding: 14px 16px !important;
+  }
+
+  .modal-footer {
+    padding: 12px 16px !important;
+    flex-direction: column-reverse;
+    gap: 8px;
+  }
+
+  .modal-footer .btn {
+    width: 100% !important;
+  }
+
+  /* Trạm quét IoT Barcode Modal */
+  .scanner-viewport {
+    height: 160px !important;
+  }
+
+  .quick-scan-buttons {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+  }
+
+  .btn-quick-scan {
+    padding: 8px 6px !important;
+    font-size: 11px !important;
+  }
+
+  .result-grid {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 6px !important;
+    font-size: 12px !important;
+  }
+
+  .result-actions {
+    flex-direction: column !important;
+    gap: 6px !important;
+  }
+
+  .result-actions .btn {
+    width: 100% !important;
+  }
+
+  /* Trang Nhập & Xuất kho */
+  .tab-nav {
+    display: flex;
+    width: 100%;
+  }
+
+  .tab-nav .tab-btn {
+    flex: 1;
+    text-align: center;
+    padding: 12px 8px;
+  }
+
+  /* Phiếu in Mẫu số 02-VT */
+  #voucher-printable-area {
+    padding: 12px !important;
+  }
+
+  .voucher-signatures {
+    grid-template-columns: 1fr !important;
+    gap: 20px;
+  }
+
+  .signature-role {
+    margin-bottom: 20px !important;
+  }
+
+  /* Trang Lịch sử Timeline */
+  .timeline-card {
+    margin-left: 24px !important;
+    padding: 12px !important;
+  }
+
+  .timeline-dot {
+    left: -24px !important;
+    width: 26px !important;
+    height: 26px !important;
+    font-size: 12px !important;
+  }
+
+  /* Trang Báo cáo Phân tích */
+  .analytics-charts-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .backup-actions-grid {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+/* --- MÀN HÌNH NHỎ (<= 420px) --- */
+@media screen and (max-width: 420px) {
+  .app-header {
+    padding: 8px 10px;
+  }
+
+  .page-main-title {
+    font-size: 13.5px !important;
+  }
+
+  .iot-scanner-trigger-btn {
+    padding: 5px 8px !important;
+    font-size: 11px !important;
+  }
+
+  .iot-btn-text {
+    display: none;
+  }
+
+  .iot-scanner-trigger-btn::after {
+    content: " Quét IoT";
+  }
+
+  /* KPI Cards chuyển sang 1 cột */
+  .kpi-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* Rack Heatmap chuyển sang 1 cột */
+  .rack-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  .quick-scan-buttons {
+    grid-template-columns: 1fr !important;
+  }
+
+  .mobile-nav-link .m-text {
+    font-size: 9.5px;
+  }
+}

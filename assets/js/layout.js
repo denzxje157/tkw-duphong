@@ -21,6 +21,7 @@ function initLayout(activePageKey) {
 
   if (sidebarContainer) {
     sidebarContainer.innerHTML = `
+      <div class="sidebar-backdrop" id="sidebar-backdrop" onclick="toggleMobileSidebar(false)"></div>
       <aside class="app-sidebar">
         <div class="sidebar-brand">
           <div class="brand-icon">🏭</div>
@@ -28,12 +29,13 @@ function initLayout(activePageKey) {
             <h3>SMART KHO</h3>
             <span>Inventory System v2.0</span>
           </div>
+          <button type="button" class="sidebar-close-btn" onclick="toggleMobileSidebar(false)" aria-label="Đóng menu">✕</button>
         </div>
 
         <div class="sidebar-section-title">PHÂN HỆ QUẢN TRỊ</div>
         <nav class="sidebar-nav">
           ${menuItems.map(item => `
-            <a href="${item.url}" class="nav-item ${item.key === activePageKey ? 'active' : ''}">
+            <a href="${item.url}" class="nav-item ${item.key === activePageKey ? 'active' : ''}" onclick="toggleMobileSidebar(false)">
               <span class="nav-icon">${item.icon}</span>
               <div class="nav-info">
                 <span class="nav-title">${item.title}</span>
@@ -59,14 +61,21 @@ function initLayout(activePageKey) {
     headerContainer.innerHTML = `
       <header class="app-header">
         <div class="header-left">
-          <h2 class="page-main-title">${activeItem.icon} ${activeItem.title}</h2>
-          <span class="page-desc">Phân hệ Quản lý Kho & Kiểm kê vật tư</span>
+          <button type="button" class="mobile-menu-toggle" onclick="toggleMobileSidebar(true)" aria-label="Mở menu">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <div class="header-title-box">
+            <h2 class="page-main-title">${activeItem.icon} ${activeItem.title}</h2>
+            <span class="page-desc">Phân hệ Quản lý Kho & Kiểm kê vật tư</span>
+          </div>
         </div>
         <div class="header-right">
           <!-- NÚT MỞ TRẠM QUÉT IOT NỔI BẬT TẠI HEADER (DỄ THẤY TRÊN MỌI TRANG) -->
           <button class="btn btn-primary btn-sm iot-scanner-trigger-btn" onclick="openIoTScannerModal()" title="Mở máy quét mã vạch giả lập IoT">
             <span class="iot-pulse-dot"></span>
-            <span>📷 Trạm Quét Barcode IoT</span>
+            <span class="iot-btn-text">📷 Trạm Quét Barcode IoT</span>
           </button>
 
           <div class="warehouse-badge">
@@ -98,6 +107,53 @@ function initLayout(activePageKey) {
 
   // Tự động chèn Modal Trạm Quét Barcode IoT vào cuối body
   injectIoTScannerModal();
+
+  // Tự động chèn Mobile App Bottom Navigation Bar
+  injectMobileBottomNav(activePageKey);
+}
+
+// Bật / tắt thanh Menu Drawer trên thiết bị di động
+function toggleMobileSidebar(open) {
+  const sidebar = document.querySelector('.app-sidebar');
+  const backdrop = document.getElementById('sidebar-backdrop');
+  if (!sidebar) return;
+  const shouldOpen = (typeof open === 'boolean') ? open : !sidebar.classList.contains('mobile-open');
+  if (shouldOpen) {
+    sidebar.classList.add('mobile-open');
+    if (backdrop) backdrop.classList.add('active');
+    document.body.classList.add('sidebar-locked');
+  } else {
+    sidebar.classList.remove('mobile-open');
+    if (backdrop) backdrop.classList.remove('active');
+    document.body.classList.remove('sidebar-locked');
+  }
+}
+window.toggleMobileSidebar = toggleMobileSidebar;
+
+// Tạo thanh điều hướng dưới đáy màn hình chuẩn Mobile App
+function injectMobileBottomNav(activePageKey) {
+  if (document.getElementById('mobile-bottom-nav')) return;
+
+  const mobileNavItems = [
+    { key: 'index', title: 'Tổng Quan', url: 'index.html', icon: '📊' },
+    { key: 'inventory', title: 'Vật Tư', url: 'inventory.html', icon: '📦' },
+    { key: 'operations', title: 'Nhập/Xuất', url: 'operations.html', icon: '🔄' },
+    { key: 'history', title: 'Lịch Sử', url: 'history.html', icon: '📜' },
+    { key: 'analytics', title: 'Báo Cáo', url: 'analytics.html', icon: '📈' },
+    { key: 'suppliers', title: 'Đối Tác', url: 'suppliers.html', icon: '🏢' }
+  ];
+
+  const navHtml = `
+    <nav class="mobile-bottom-nav" id="mobile-bottom-nav">
+      ${mobileNavItems.map(item => `
+        <a href="${item.url}" class="mobile-nav-link ${item.key === activePageKey ? 'active' : ''}">
+          <span class="m-icon">${item.icon}</span>
+          <span class="m-text">${item.title}</span>
+        </a>
+      `).join('')}
+    </nav>
+  `;
+  document.body.insertAdjacentHTML('beforeend', navHtml);
 }
 
 /**
