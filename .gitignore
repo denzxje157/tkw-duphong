@@ -13,3 +13,10 @@ __pycache__/
 *.pyc
 update_docx_with_repo.py
 check_ids.js
+
+# Exported member local workspaces
+mem1/
+mem2/
+mem3/
+mem4/
+mem5/
