@@ -277,6 +277,98 @@ body {
 .page-content {
   padding: 24px 28px;
   flex: 1;
+  animation: pageEntranceFadeIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+  will-change: opacity, transform;
+}
+
+/* ==============================================================================
+ * HIỆU ỨNG CHUYỂN TRANG MƯỢT MÀ (SMOOTH PAGE TRANSITIONS & TOP PROGRESS BAR)
+ * ==============================================================================
+ */
+
+/* Thanh tiến trình chuyển trang ở đỉnh màn hình (YouTube / Vercel style) */
+.top-page-loader {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 3px;
+  width: 0%;
+  background: linear-gradient(90deg, #2563eb, #38bdf8, #10b981);
+  box-shadow: 0 0 10px rgba(56, 189, 248, 0.7);
+  z-index: 999999;
+  transition: width 0.25s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.25s ease;
+  pointer-events: none;
+}
+
+/* Hiệu ứng khi trang vừa xuất hiện (Page Entrance Animation) */
+@keyframes pageEntranceFadeIn {
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.996);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Hiệu ứng trượt nhẹ phân tầng cho các Card khi mở trang (Staggered Cascade) */
+.page-content > .card,
+.page-content > .dashboard-split-grid,
+.page-content > .analytics-charts-grid,
+.page-content > .analytics-insights-grid,
+.page-content > .kpi-grid,
+.page-content > .rack-heatmap-section {
+  animation: componentSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.page-content > *:nth-child(1) { animation-delay: 0.03s; }
+.page-content > *:nth-child(2) { animation-delay: 0.07s; }
+.page-content > *:nth-child(3) { animation-delay: 0.11s; }
+.page-content > *:nth-child(4) { animation-delay: 0.15s; }
+
+@keyframes componentSlideUp {
+  0% {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Hiệu ứng khi chuẩn bị rời trang (Page Exit Animation) */
+.page-content.page-exit-anim {
+  opacity: 0 !important;
+  transform: translateY(-8px) scale(0.995) !important;
+  transition: opacity 0.16s cubic-bezier(0.4, 0, 1, 1), transform 0.16s cubic-bezier(0.4, 0, 1, 1) !important;
+}
+
+/* Hiệu ứng phản hồi chạm ngón tay / click (Micro-interactions) trên menu */
+.sidebar-nav .nav-item {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.sidebar-nav .nav-item:active {
+  transform: scale(0.97);
+}
+
+.mobile-nav-link {
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mobile-nav-link:active {
+  transform: scale(0.92);
+}
+
+.mobile-nav-link:active .m-icon {
+  transform: translateY(-2px) scale(1.15);
+}
+
+/* Hỗ trợ chuẩn Native View Transitions API cho Chrome 111+ & Edge & Safari 18+ */
+@view-transition {
+  navigation: auto;
 }
 
 /* --- CARDS & KPI CARDS --- */

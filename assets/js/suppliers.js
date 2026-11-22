@@ -121,7 +121,11 @@ function renderSuppliersTable() {
 // 1-Click Nhập hàng từ nhà cung cấp
 function restockFromSupplier(supplierName) {
   sessionStorage.setItem('PRESELECT_SUPPLIER_NAME', supplierName);
-  window.location.href = 'operations.html';
+  if (typeof smoothNavigate === 'function') {
+    smoothNavigate('operations.html');
+  } else {
+    window.location.href = 'operations.html';
+  }
 }
 
 function openAddSupplierModal() {

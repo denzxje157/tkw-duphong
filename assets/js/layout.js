@@ -127,7 +127,91 @@ function initLayout(activePageKey) {
 
   // Tự động chèn Mobile App Bottom Navigation Bar
   injectMobileBottomNav(activePageKey);
+
+  // Kích hoạt hiệu ứng chuyển trang mượt mà (Smooth Page Transitions & Top Progress Bar)
+  setupPageTransitions();
 }
+
+// ==============================================================================
+// HỆ THỐNG HIỆU ỨNG CHUYỂN TRANG MƯỢT MÀ (SMOOTH PAGE TRANSITIONS)
+// ==============================================================================
+function setupPageTransitions() {
+  // 1. Tạo thanh tiến trình siêu mỏng ở đỉnh (Top Progress Loader)
+  let loader = document.getElementById('top-page-loader');
+  if (!loader) {
+    loader = document.createElement('div');
+    loader.id = 'top-page-loader';
+    loader.className = 'top-page-loader';
+    document.body.prepend(loader);
+  }
+
+  // Khi tải trang: Chạy thanh tiến trình mượt về 100% rồi biến mất
+  requestAnimationFrame(() => {
+    loader.style.width = '100%';
+    setTimeout(() => {
+      loader.style.opacity = '0';
+      setTimeout(() => {
+        loader.style.width = '0%';
+      }, 250);
+    }, 120);
+  });
+
+  // 2. Chặn điều hướng thô của trình duyệt để tạo chuyển cảnh mượt mà
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('a');
+    if (!link) return;
+
+    const href = link.getAttribute('href');
+    if (!href || href.startsWith('#') || href.startsWith('javascript:') || href.startsWith('tel:') || href.startsWith('mailto:')) {
+      return;
+    }
+
+    if (link.target === '_blank' || link.hasAttribute('download')) {
+      return;
+    }
+
+    if (href.endsWith('.html') || (!href.includes('://') && !href.startsWith('//'))) {
+      const currentFile = window.location.pathname.split('/').pop() || 'index.html';
+      if (href === currentFile) {
+        return; // Đang ở chính trang hiện tại
+      }
+
+      e.preventDefault();
+      smoothNavigate(href);
+    }
+  });
+}
+
+// Hàm điều hướng mượt mà giữa các trang
+function smoothNavigate(url) {
+  if (!url) return;
+
+  const loader = document.getElementById('top-page-loader');
+  if (loader) {
+    loader.style.opacity = '1';
+    loader.style.width = '75%';
+  }
+
+  const content = document.querySelector('.page-content');
+  if (content) {
+    content.classList.add('page-exit-anim');
+  }
+
+  // Đóng sidebar nếu đang mở trên màn hình di động
+  if (typeof toggleMobileSidebar === 'function') {
+    toggleMobileSidebar(false);
+  }
+
+  setTimeout(() => {
+    window.location.href = url;
+  }, 160);
+}
+
+window.smoothNavigate = smoothNavigate;
+window.quickRestock = function(itemId) {
+  sessionStorage.setItem('QUICK_RESTOCK_ITEM_ID', itemId);
+  smoothNavigate('operations.html');
+};
 
 // Bật / tắt thanh Menu Drawer trên thiết bị di động
 function toggleMobileSidebar(open) {
@@ -397,10 +481,10 @@ function triggerScanItem(barcodeOrId) {
 function navigateToOperations(itemId, tab) {
   sessionStorage.setItem('QUICK_RESTOCK_ITEM_ID', itemId);
   closeIoTScannerModal();
-  window.location.href = 'operations.html';
+  smoothNavigate('operations.html');
 }
 
 function locateInInventory(itemId) {
   closeIoTScannerModal();
-  window.location.href = 'inventory.html';
+  smoothNavigate('inventory.html');
 }
