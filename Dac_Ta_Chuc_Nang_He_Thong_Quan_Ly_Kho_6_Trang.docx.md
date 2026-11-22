@@ -73,6 +73,32 @@ Hệ thống Quản lý Kho & Kiểm kê Vật tư là phân hệ quản trị v
 * **Liên kết dữ liệu phiếu Nhập (Foreign Data Linking):** Toàn bộ danh sách Nhà cung cấp tại đây được tự động nạp làm options trong thẻ \<select\> của Trang Nhập/Xuất kho.  
 * **Thống kê hợp tác:** Đếm tự động số lần nhập hàng và tổng giá trị đã mua từ từng đối tác dựa trên dữ liệu giao dịch trong lịch sử.
 
+## **2.7. HỆ THỐNG TRỢ LÝ ẢO THỦ KHO AI (chatbot.js & CSS)**
+
+Trợ lý ảo điều hành kho (Action-Driven Smart Chatbot) được nhúng tự động trên cả 6 trang giao diện thông qua `assets/js/layout.js`.
+
+### **Mục tiêu & Yêu cầu kỹ thuật:**
+1. **Thuần túy 100% Vanilla JavaScript & CSS3:** Không phụ thuộc bất kỳ thư viện bên ngoài (Không jQuery, không React, không iframe dịch vụ thứ ba).
+2. **Giao diện Nổi & Tương thích Mobile:**
+   - Nút nổi tròn `#chatbot-floating-btn` ở góc phải bên dưới, có hiệu ứng phát sáng nhẹ (pulse) và chấm đỏ báo tin chưa đọc.
+   - Khi hiển thị trên thiết bị di động (< 768px), tự động nâng độ cao lên `bottom: 80px` để không bị đè bởi thanh điều hướng đáy `mobile-bottom-nav`.
+3. **Thanh Gợi Ý Nhanh 1 Chạm (Quick Suggestion Chips):**
+   - Hàng chip gợi ý cuộn ngang: *"⚡ Nhập 50 bao xi măng"*, *"⚡ Xuất 5 thép cuộn"*, *"📄 In phiếu xuất VT002"*, *"🚨 Hàng sắp hết"*, *"📦 Kệ xi măng ở đâu?"*, *"📞 Hotline Hòa Phát"*, *"💰 Tổng giá trị kho"*.
+4. **Bộ Nhớ Hội Thoại Bền Vững (LocalStorage Memory):**
+   - Lưu trữ toàn bộ tin nhắn vào khóa `SMARTKHO_CHAT_HISTORY`. Khi tải lại trang (F5) hoặc chuyển giữa 6 trang, toàn bộ lịch sử hỏi đáp được bảo toàn nguyên vẹn. Kèm nút `🗑️` để xóa sạch lịch sử khi cần.
+5. **Trí Tuệ Xử Lý Ngôn Ngữ Tự Nhiên & Tìm Kiếm Không Dấu (NLP):**
+   - Tự động chuẩn hóa tiếng Việt không dấu (`removeVietnameseTones`) để nhận diện chính xác câu lệnh dù gõ có dấu hay không dấu.
+   - Tra cứu số tồn kho, tình trạng (Đỏ/Vàng/Xanh), tọa độ kệ hàng chi tiết (VD: `Kệ A2-01 - Khu Vật liệu nặng, Tầng 1`).
+   - Tra cứu hotline, email, địa chỉ nhà cung cấp (Hòa Phát, Vicem, Cadivi, Tiền Phong).
+6. **Chế Độ Thực Thi Lệnh Trực Tiếp (Action Mode Execution):**
+   - **Tự động Nhập Hàng:** Bóc tách regex số lượng và tên hàng (VD: *"nhập 20 bao xi măng"*), gọi `window.DB.importStock()`, ghi log và cập nhật LocalStorage ngay lập tức.
+   - **Tự động Xuất Hàng:** Kiểm tra tồn khả dụng; kiên quyết từ chối xuất nếu vượt quá tồn kho hiện có để chặn xuất âm tuyệt đối.
+   - **Trích Xuất & In Phiếu Kho Mẫu 02-VT Lập Tức:** Tự động tạo mẫu phiếu xuất/nhập chuẩn Bộ Tài chính (Thông tư 200/2014/TT-BTC) và kích hoạt `window.print()`.
+   - **Bảo Vệ Kiểm Toán Dữ Liệu:** Chặn yêu cầu xóa vật tư còn tồn kho > 0 hoặc xóa lẻ tẻ nhật ký kế toán; cung cấp nút `Reset Dữ liệu gốc` và `Tải bản sao lưu .json`.
+   - **Âm Thanh Phản Hồi:** Tích hợp Web Audio API phát tiếng "ting" xác nhận nhẹ nhàng khi thực thi lệnh thành công.
+
+---
+
 # **3\. THIẾT KẾ CẤU TRÚC DỮ LIỆU & RÀNG BUỘC KỸ THUẬT (LOCALSTORAGE)**
 
 Để đảm bảo 6 trang web hoạt động nhất quán mà không gặp xung đột dữ liệu, hệ thống thiết kế 3 khóa dữ liệu chính trong LocalStorage chuẩn JSON Schema:
