@@ -130,6 +130,14 @@ function initLayout(activePageKey) {
 
   // Kích hoạt hiệu ứng chuyển trang mượt mà (Smooth Page Transitions & Top Progress Bar)
   setupPageTransitions();
+
+  // Tự động tải Module Trợ Lý Ảo Chatbot AI (Tương thích 100% mọi trang)
+  if (!document.getElementById('chatbot-script-tag') && typeof initSmartChatbot !== 'function') {
+    const chatScript = document.createElement('script');
+    chatScript.id = 'chatbot-script-tag';
+    chatScript.src = 'assets/js/chatbot.js';
+    document.body.appendChild(chatScript);
+  }
 }
 
 // ==============================================================================
