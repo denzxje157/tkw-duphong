@@ -1,0 +1,171 @@
+/* ==============================================================================
+ * PHÂN HỆ: ĐIỀU PHỐI NHẬP & XUẤT KHO (operations.html)
+ * Phụ trách: Member 1 (Nguyễn Hoàng Anh)
+ * ============================================================================== */
+
+/* Cảnh báo lỗi rung lắc khi nhập số lượng vượt tồn */
+.input-error {
+  border-color: var(--danger) !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+  animation: shake 0.3s ease-in-out;
+}
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-4px); }
+  75% { transform: translateX(4px); }
+}
+
+.hint-danger {
+  color: var(--danger) !important;
+  font-weight: 600;
+}
+
+/* Tab chuyển đổi Nhập Kho / Xuất Kho */
+.tab-content {
+  display: none;
+}
+
+.tab-content.active {
+  display: block;
+  animation: fadeIn 0.2s ease;
+}
+
+/* Thẻ tổng kết nhanh tồn kho khi chọn vật tư */
+.stock-preview-box {
+  background: var(--body-bg);
+  border: 1px dashed var(--border-color);
+  border-radius: var(--radius);
+  padding: 12px 16px;
+  margin-top: 10px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.stock-preview-box .sku-code {
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--primary);
+}
+
+/* --- PRINTABLE VOUCHER / HÓA ĐƠN KHO CHUYÊN NGHIỆP (MẪU 02-VT) --- */
+.voucher-modal-box {
+  max-width: 720px;
+  background: #ffffff;
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+}
+
+.voucher-paper {
+  background: #fff;
+  padding: 30px;
+  color: #111827;
+  font-family: 'Times New Roman', serif, 'Segoe UI';
+}
+
+.voucher-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 20px;
+  border-bottom: 2px solid #1e293b;
+  padding-bottom: 12px;
+}
+
+.voucher-title-box {
+  text-align: center;
+  margin: 15px 0 20px;
+}
+
+.voucher-title {
+  font-size: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #0f172a;
+}
+
+.voucher-no {
+  font-size: 13px;
+  color: #475569;
+  font-style: italic;
+  margin-top: 4px;
+}
+
+.voucher-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 15px 0;
+}
+
+.voucher-table th,
+.voucher-table td {
+  border: 1px solid #334155;
+  padding: 8px 10px;
+  font-size: 13px;
+}
+
+.voucher-table th {
+  background-color: #f1f5f9;
+  font-weight: 700;
+  text-align: center;
+}
+
+.voucher-signatures {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+  margin-top: 30px;
+  text-align: center;
+}
+
+.sign-title {
+  font-weight: 700;
+  font-size: 12px;
+  color: #1e293b;
+}
+
+.sign-sub {
+  font-size: 11px;
+  color: #64748b;
+  font-style: italic;
+}
+
+.sign-space {
+  height: 60px;
+}
+
+.sign-name {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+/* Ẩn mọi giao diện xung quanh khi bấm In (Ctrl + P) */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #voucher-modal, #voucher-modal * {
+    visibility: visible;
+  }
+  #voucher-modal {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: auto;
+    background: white !important;
+    padding: 0;
+    margin: 0;
+  }
+  .voucher-modal-box {
+    box-shadow: none;
+    border: none;
+    max-width: 100%;
+    width: 100%;
+  }
+  .modal-footer, .modal-close-btn, .app-sidebar, .app-header, .mobile-bottom-nav, #chatbot-floating-btn {
+    display: none !important;
+  }
+}

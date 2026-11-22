@@ -1,0 +1,75 @@
+/* ==============================================================================
+ * PHÂN HỆ: QUẢN LÝ DANH MỤC VẬT TƯ (inventory.html)
+ * Phụ trách: Member 3 (Hà Văn Kiên)
+ * ============================================================================== */
+
+/* Banner Trạm Quét Barcode IoT trên trang danh mục */
+.iot-banner-card {
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+  color: #f8fafc;
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin-bottom: 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: var(--shadow);
+}
+
+.iot-banner-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.iot-banner-info .icon-scanner {
+  font-size: 28px;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 8px;
+  border-radius: 8px;
+}
+
+/* Thanh công cụ tìm kiếm và lọc nâng cao */
+.inventory-toolbar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 16px;
+  align-items: center;
+}
+
+.search-input-wrapper {
+  flex: 1;
+  min-width: 240px;
+  position: relative;
+}
+
+.search-input-wrapper input {
+  padding-left: 36px;
+}
+
+.search-icon-inside {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+/* Thao tác hàng trong bảng */
+.table-actions {
+  display: flex;
+  gap: 6px;
+  justify-content: center;
+}
+
+.btn-icon-sm {
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 4px;
+}

@@ -1,0 +1,131 @@
+/* ==============================================================================
+ * PHÂN HỆ: TRANG CHỦ & BẢN ĐỒ KỆ KHO IOT HEATMAP (index.html)
+ * Phụ trách: Member 2 (Trần Quang Huy)
+ * ============================================================================== */
+
+/* --- RACK HEATMAP (BẢN ĐỒ KỆ KHO THÔNG MINH) --- */
+.rack-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 12px;
+  margin-top: 10px;
+  width: 100%;
+}
+
+.rack-cell {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 10px 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+}
+
+.rack-cell:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+  border-color: var(--primary);
+}
+
+.rack-cell::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: 4px;
+}
+
+.rack-cell.rack-ok::before {
+  background: var(--success);
+}
+
+.rack-cell.rack-warning::before {
+  background: var(--warning);
+}
+
+.rack-cell.rack-danger::before {
+  background: var(--danger);
+}
+
+.rack-code {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.rack-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-main);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-bottom: 6px;
+}
+
+.rack-qty-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 11px;
+}
+
+.rack-qty-val {
+  font-weight: 700;
+  color: var(--text-main);
+}
+
+/* Vùng hiển thị biểu đồ Donut Canvas */
+.donut-chart-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  padding: 10px 0;
+}
+
+.donut-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 15px;
+  width: 100%;
+}
+
+.donut-legend-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+}
+
+.donut-legend-color {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 2px;
+  margin-right: 6px;
+}
+
+@media (max-width: 992px) {
+  .rack-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 576px) {
+  .rack-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+}

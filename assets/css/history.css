@@ -1,0 +1,106 @@
+/* ==============================================================================
+ * PHÂN HỆ: DÒNG THỜI GIAN LỊCH SỬ GIAO DỊCH (history.html)
+ * Phụ trách: Member 4 (Nguyễn Lê Đông)
+ * ============================================================================== */
+
+/* --- VIEW TOGGLE BUTTONS (HISTORY) --- */
+.view-toggle-group {
+  display: inline-flex;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.view-toggle-btn {
+  padding: 6px 14px;
+  font-size: 12.5px;
+  font-weight: 600;
+  background: #fff;
+  border: none;
+  cursor: pointer;
+  color: var(--text-muted);
+  transition: all 0.15s ease;
+}
+
+.view-toggle-btn.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* --- TIMELINE (DÒNG THỜI GIAN LỊCH SỬ) --- */
+.timeline {
+  position: relative;
+  padding: 15px 0 15px 35px;
+}
+
+.timeline::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 14px;
+  width: 2px;
+  background-color: var(--border-color);
+}
+
+.timeline-item {
+  position: relative;
+  margin-bottom: 24px;
+}
+
+.timeline-item:last-child {
+  margin-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -28px;
+  top: 4px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background-color: var(--primary);
+  border: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px var(--primary);
+}
+
+.timeline-dot.import {
+  background-color: var(--success);
+  box-shadow: 0 0 0 2px var(--success);
+}
+
+.timeline-dot.export {
+  background-color: var(--warning);
+  box-shadow: 0 0 0 2px var(--warning);
+}
+
+.timeline-card {
+  background: #ffffff;
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius);
+  padding: 14px 18px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow 0.2s ease;
+}
+
+.timeline-card:hover {
+  box-shadow: var(--shadow);
+}
+
+.timeline-time {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+
+.timeline-title {
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 6px;
+  color: var(--text-main);
+}
+
+.timeline-details {
+  font-size: 12.5px;
+  color: var(--text-muted);
+}

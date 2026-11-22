@@ -115,3 +115,96 @@ Trợ lý ảo điều hành kho (Action-Driven Smart Chatbot) được nhúng t
 * **Ràng buộc số học nhập/xuất kho:** Các trường input số lượng bắt buộc dùng HTML5 min='1', step='1' và type='number' để triệt tiêu số âm hoặc số thập phân vô lý. Khi xuất kho, bắt buộc kiểm tra điều kiện xuất \<= tồn, nếu sai phải chặn thao tác ngay lập tức.  
 * **Tách bạch mã nguồn & Không dẫm chân:** Tạo thư mục assets/css/ chung cho layout hệ thống và các file js/ riêng biệt tương ứng từng trang để 5 thành viên có thể đẩy code song song lên Git mà không bị conflict.  
 * **Dữ liệu khởi tạo mẫu (Data Seeding):** Hệ thống tự động nạp sẵn 15 vật tư và 4 nhà cung cấp mẫu nếu lần đầu mở web trên máy mới, bảo đảm khi demo giảng viên luôn có sẵn dữ liệu trực quan sinh động.
+# **5\. CHIẾN LƯỢC TÁCH FILE ZERO-CONFLICT CHO 5 THÀNH VIÊN KHI LÀM LẠI TỪ ĐẦU**
+
+### **📌 Hai cạm bẫy "chết người" 90% nhóm sinh viên dính phải khi làm nhóm Git:**
+1. **Cạm bẫy "Sửa chung 1 file CSS/DB" (Shared File Collision):** Nếu cả 5 người cùng mở 1 file `style.css` và 1 file `db.js` ra code, khi tạo Pull Request để gộp nhánh vào `main`, Git sẽ báo đỏ lòm **MERGE CONFLICT** tanh bành vì cùng chỉnh sửa trên các dòng kề cận. Nhóm sẽ phải ngồi sửa tay (conflict resolution) từng dòng, rất dễ xóa nhầm code của bạn khác dẫn đến vỡ toàn bộ trang web.
+2. **Cạm bẫy "Bê nguyên cả project đi nộp" (Polluted Pull Request):** Khi Member 2 đẩy nhánh `feature/member-2` lên GitHub, giảng viên vào tab **Files Changed** của PR mà thấy bạn ấy đẩy cả 15 files (chứa cả code của Mem 1, 3, 4, 5) thì giảng viên sẽ đánh giá ngay: *"Ủa sao bạn này bê nguyên cả project về nộp chứ có tự code đúng phân công đâu?"*. Từng thành viên bắt buộc phải có Pull Request sạch sẽ: **CHỈ XUẤT HIỆN ĐÚNG CÁC FILE MÌNH ĐƯỢC PHÂN CÔNG**.
+
+---
+
+### **🎯 Giải pháp chia file chuẩn điểm 10 (Zero Conflict Architecture):**
+
+#### **1. Tách riêng CSS cho từng trang (Tuyệt đối không đụng chung):**
+* `assets/css/common.css` (Bộ màu, reset, sidebar dùng chung): Được coi là thư viện nền tảng có sẵn trên nhánh `main`, tất cả 5 mem **KHÔNG ĐƯỢC SỬA**.
+* Mỗi bạn chỉ tự viết CSS cho trang của mình trong file riêng:
+  * Mem 1: `assets/css/operations.css` (In hóa đơn Mẫu 02-VT, form Nhập/Xuất)
+  * Mem 2: `assets/css/index.css` (Bản đồ kệ kho Heatmap, Donut Canvas, KPI cards)
+  * Mem 3: `assets/css/inventory.css` (Bảng danh mục, modal thêm vật tư, trạm IoT)
+  * Mem 4: `assets/css/history.css` (Timeline lịch sử dọc, toggle bảng đối soát)
+  * Mem 5: `assets/css/analytics.css` (Biểu đồ cột canvas, dự báo cạn kho, đối tác)
+
+#### **2. Phân chia quyền sở hữu file rõ ràng (Mỗi người 1 giỏ):**
+| Thành viên | File HTML | File CSS riêng | File JS riêng | Khi Push lên Git chỉ được có đúng các file này: |
+| :--- | :--- | :--- | :--- | :--- |
+| **Mem 1 (Nguyễn Hoàng Anh)** | `operations.html` | `operations.css` | `operations.js` | **3 files** |
+| **Mem 2 (Trần Quang Huy)** | `index.html` | `index.css` | `index.js` | **3 files** |
+| **Mem 3 (Hà Văn Kiên)** | `inventory.html` | `inventory.css` | `inventory.js` | **3 files** |
+| **Mem 4 (Nguyễn Lê Đông)** | `history.html` | `history.css` | `history.js` | **3 files** |
+| **Mem 5 (Hoàng Minh Phát)** | `analytics.html`, `suppliers.html` | `analytics.css` | `analytics.js`, `suppliers.js` | **5 files** |
+
+*(Các file dùng chung như `db.js`, `layout.js`, `chatbot.js`, `common.css` đóng vai trò như Framework/Thư viện có sẵn trên main, mem chỉ gọi hàm chứ không sửa).*
+
+---
+
+### **📌 Hướng dẫn cụ thể các file nền tảng (Shared Files) hoạt động thế nào khi tự làm lại từ đầu:**
+* **`assets/css/common.css`:** Chứa toàn bộ biến màu (`:root`), cấu trúc khung `.app-layout`, `.app-sidebar` (260px cố định bên trái), `.app-main`, `.app-header` (sticky), bảng dữ liệu `.table`, các loại nút `.btn`, modal `.modal-overlay`, thanh điều hướng mobile `.mobile-bottom-nav`, và widget trợ lý ảo AI. File này trưởng nhóm đẩy lên nhánh `main` đầu tiên và "đóng băng", không ai được sửa vào.
+* **`assets/js/db.js`:** Quản lý LocalStorage, nạp sẵn `seed.json` ban đầu. Cung cấp API `window.DB` với đầy đủ các hàm: `getItems`, `getItemById`, `saveItem`, `deleteItem`, `importStock`, `exportStock`, `getLogs`, `formatCurrency`, `showToast`. Thành viên chỉ gọi hàm (ví dụ: `DB.getItems()` để lấy danh sách hiển thị, `DB.importStock(...)` để nhập kho), **TUYỆT ĐỐI KHÔNG SỬA CODE BÊN TRONG `db.js`**.
+* **`assets/js/layout.js`:** Chứa hàm `initLayout(activePageKey)`, tự động tiêm Sidebar 6 trang, Header đồng hồ số và Trạm Quét Barcode IoT vào thẻ `<div class="app-layout">`, tự động nạp `chatbot.js`. Giúp 5 thành viên không cần code lại menu Sidebar hay Header trên trang HTML của mình!
+* **`assets/js/chatbot.js`:** Trợ lý AI điều hành toàn cục, tra cứu tồn kho không dấu, tự động nhập hàng và in phiếu Mẫu 02-VT.
+* **`data/seed.json`:** File dữ liệu hạt giống ban đầu (12 vật tư, 4 đối tác, 4 logs).
+
+---
+
+### **📌 Cấu trúc khung mẫu (Starter Template) chuẩn của 1 trang HTML:**
+```html
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>[Tên Trang Của Bạn] - Hệ Thống Smart Kho</title>
+  <!-- 1. CSS DÙNG CHUNG CỐ ĐỊNH (Không sửa) -->
+  <link rel="stylesheet" href="assets/css/common.css">
+  <!-- 2. CSS RIÊNG CỦA THÀNH VIÊN (Tự do sáng tạo, 0% conflict) -->
+  <link rel="stylesheet" href="assets/css/[file_css_rieng_cua_ban].css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- layout.js sẽ tự động render Sidebar 6 trang tại đây -->
+    <main class="app-main">
+      <!-- layout.js sẽ tự động render Header tại đây -->
+      <div class="app-content">
+        <!-- NỘI DUNG RIÊNG CỦA THÀNH VIÊN VIẾT TẠI ĐÂY -->
+      </div>
+    </main>
+  </div>
+
+  <!-- 3. CÁC SCRIPT NỀN TẢNG DÙNG CHUNG (Gọi trước) -->
+  <script src="assets/js/db.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <!-- 4. SCRIPT RIÊNG CỦA THÀNH VIÊN (Logic phân hệ) -->
+  <script src="assets/js/[file_js_rieng_cua_ban].js"></script>
+</body>
+</html>
+```
+
+---
+
+### **📌 Quy trình 5 bước thực hành Git khi làm lại ngày mai (Thủ công chuẩn điểm 10):**
+1. **Bước 1:** Trưởng nhóm tạo repository mới trên GitHub, đẩy các file nền tảng (`common.css`, `db.js`, `layout.js`, `chatbot.js`, `seed.json`) lên nhánh `main`.
+2. **Bước 2:** 5 thành viên clone về máy và checkout sang nhánh riêng của mình:
+   ```bash
+   git clone <URL_REPO>
+   git checkout -b feature/member-X-...
+   ```
+3. **Bước 3:** Từng bạn mở `SmartKho_ThanhVien.bat` chọn số của mình để mở đúng 3 file (hoặc 5 file) được phân công.
+4. **Bước 4:** Viết code cho phân hệ của mình theo đúng bộ prompt kỹ thuật.
+5. **Bước 5:** Khi đẩy code, **CHỈ ADD ĐÚNG CÁC FILE CỦA MÌNH (TUYỆT ĐỐI KHÔNG GÕ `git add .`)**:
+   ```bash
+   # Ví dụ Mem 1:
+   git add operations.html assets/css/operations.css assets/js/operations.js
+   git commit -m "feat(member-1): hoàn thiện phân hệ nhập xuất kho"
+   git push origin feature/member-1-operations
+   ```
+6. **Bước 6:** Lên GitHub tạo Pull Request -> Tab **Files Changed** chỉ hiện đúng các file của bạn, không dính code người khác, **0% CONFLICT**!
