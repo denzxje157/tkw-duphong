@@ -8,6 +8,13 @@
 document.addEventListener('DOMContentLoaded', () => {
   initLayout('analytics');
   loadAnalytics();
+
+  // Đăng ký nhận thông báo Realtime từ hệ thống
+  if (window.DB && typeof window.DB.onUpdate === 'function') {
+    window.DB.onUpdate(() => {
+      loadAnalytics();
+    });
+  }
 });
 
 function loadAnalytics() {
@@ -45,42 +52,47 @@ function loadAnalytics() {
   renderDeadStock(items, logs);
 }
 
-// 1. Vẽ biểu đồ so sánh cột Nhập vs Xuất bằng HTML5 Canvas thuần
+// 1. Vẽ biểu đồ so sánh cột Nhập vs Xuất bằng HTML5 Canvas thuần (Căn chỉnh động)
 function renderBarCompareChart(importVal, exportVal) {
   const canvas = document.getElementById('barCompareChart');
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  const w = canvas.width;
   const maxVal = Math.max(importVal, exportVal, 1000000);
-  const chartHeight = 160;
-  const bottomY = 200;
+  const chartHeight = 150;
+  const bottomY = 195;
+
+  const colWidth = Math.min(80, Math.floor(w * 0.22));
+  const col1X = Math.floor(w * 0.3 - colWidth / 2);
+  const col2X = Math.floor(w * 0.7 - colWidth / 2);
 
   // Cột Nhập (Xanh lá)
-  const importHeight = (importVal / maxVal) * chartHeight;
+  const importHeight = Math.max(8, (importVal / maxVal) * chartHeight);
   ctx.fillStyle = '#10b981';
-  ctx.fillRect(80, bottomY - importHeight, 80, importHeight);
+  ctx.fillRect(col1X, bottomY - importHeight, colWidth, importHeight);
 
   // Cột Xuất (Xanh dương)
-  const exportHeight = (exportVal / maxVal) * chartHeight;
+  const exportHeight = Math.max(8, (exportVal / maxVal) * chartHeight);
   ctx.fillStyle = '#2563eb';
-  ctx.fillRect(240, bottomY - exportHeight, 80, exportHeight);
+  ctx.fillRect(col2X, bottomY - exportHeight, colWidth, exportHeight);
 
   // Nhãn & Giá trị
   ctx.fillStyle = '#1e293b';
   ctx.font = 'bold 12px Segoe UI';
   ctx.textAlign = 'center';
 
-  ctx.fillText('Tổng Nhập', 120, bottomY + 20);
-  ctx.fillText('Tổng Xuất', 280, bottomY + 20);
+  ctx.fillText('Tổng Nhập', col1X + colWidth / 2, bottomY + 22);
+  ctx.fillText('Tổng Xuất', col2X + colWidth / 2, bottomY + 22);
 
   ctx.fillStyle = '#475569';
-  ctx.font = '11px Segoe UI';
-  ctx.fillText(formatShort(importVal), 120, bottomY - importHeight - 8);
-  ctx.fillText(formatShort(exportVal), 280, bottomY - exportHeight - 8);
+  ctx.font = '11.5px Segoe UI';
+  ctx.fillText(formatShort(importVal), col1X + colWidth / 2, bottomY - importHeight - 8);
+  ctx.fillText(formatShort(exportVal), col2X + colWidth / 2, bottomY - exportHeight - 8);
 }
 
-// 2. Vẽ biểu đồ thanh ngang Top 5
+// 2. Vẽ biểu đồ thanh ngang Top 5 Luân chuyển nhanh
 function renderTopItemsChart(items, exportCounts) {
   const canvas = document.getElementById('topItemsChart');
   if (!canvas) return;
@@ -93,7 +105,7 @@ function renderTopItemsChart(items, exportCounts) {
       return { id, name: item.name, count: exportCounts[id], unit: item.unit };
     })
     .sort((a, b) => b.count - a.count)
-    .slice(0, 4);
+    .slice(0, 5);
 
   if (sorted.length === 0) {
     ctx.fillStyle = '#94a3b8';
@@ -104,27 +116,29 @@ function renderTopItemsChart(items, exportCounts) {
   }
 
   const maxCount = Math.max(...sorted.map(s => s.count), 1);
-  const startY = 40;
-  const barGap = 45;
+  const startY = 32;
+  const barGap = 40;
+  const maxBarWidth = Math.max(120, canvas.width - 150);
 
   sorted.forEach((item, idx) => {
     const y = startY + idx * barGap;
-    const barWidth = (item.count / maxCount) * 180;
+    const barWidth = Math.max(12, (item.count / maxCount) * maxBarWidth);
 
     // Tên vật tư
     ctx.fillStyle = '#1e293b';
-    ctx.font = '12px Segoe UI';
+    ctx.font = '11.5px Segoe UI';
     ctx.textAlign = 'left';
-    ctx.fillText(`${idx + 1}. ${item.name.slice(0, 18)}...`, 15, y - 6);
+    const displayName = item.name.length > 25 ? item.name.slice(0, 24) + '...' : item.name;
+    ctx.fillText(`${idx + 1}. ${displayName}`, 15, y - 5);
 
-    // Thanh ngang
+    // Thanh ngang bo góc nhẹ
     ctx.fillStyle = '#3b82f6';
-    ctx.fillRect(15, y, barWidth, 14);
+    ctx.fillRect(15, y, barWidth, 12);
 
     // Số lượng
-    ctx.fillStyle = '#64748b';
+    ctx.fillStyle = '#475569';
     ctx.font = 'bold 11px Segoe UI';
-    ctx.fillText(`${item.count} ${item.unit}`, 25 + barWidth, y + 11);
+    ctx.fillText(`${item.count} ${item.unit}`, 25 + barWidth, y + 10);
   });
 }
 

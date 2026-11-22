@@ -9,6 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initLayout('history');
   renderTimeline();
   setupFilterListeners();
+
+  // Đăng ký nhận thông báo Realtime từ hệ thống
+  if (window.DB && typeof window.DB.onUpdate === 'function') {
+    window.DB.onUpdate(() => {
+      renderTimeline();
+    });
+  }
 });
 
 function setupFilterListeners() {

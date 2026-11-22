@@ -53,7 +53,7 @@
 
         <div class="card">
           <!-- BỘ LỌC VÀ TÌM KIẾM TỨC THỜI (LIVE SEARCH) -->
-          <div style="display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr auto; gap: 12px; margin-bottom: 20px; align-items: end;">
+          <div class="inventory-filter-grid">
             <div class="form-group" style="margin-bottom: 0;">
               <label class="form-label">🔍 Tìm kiếm nhanh (Tên, Mã SKU, Vị trí)</label>
               <input type="text" id="search-input" class="form-control" placeholder="Nhập từ khóa tìm kiếm...">
@@ -133,7 +133,7 @@
         <div class="modal-body">
           <input type="hidden" id="form-item-id">
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-row-2col">
             <div class="form-group">
               <label class="form-label">Mã SKU (*)</label>
               <input type="text" id="form-sku" class="form-control" placeholder="Tự sinh nếu để trống">
@@ -149,7 +149,7 @@
             <input type="text" id="form-name" class="form-control" required placeholder="Nhập tên vật tư...">
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-row-2col">
             <div class="form-group">
               <label class="form-label">Danh Mục</label>
               <select id="form-category" class="form-control" required>
@@ -171,7 +171,7 @@
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+          <div class="form-row-3col">
             <div class="form-group">
               <label class="form-label">Đơn Vị Tính</label>
               <input type="text" id="form-unit" class="form-control" required placeholder="Bao, Cây, Cuộn...">
@@ -187,7 +187,7 @@
             </div>
           </div>
 
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div class="form-row-2col">
             <div class="form-group">
               <label class="form-label">Giá Nhập (VNĐ)</label>
               <input type="number" id="form-price-import" class="form-control" min="0" step="1000" required value="100000">

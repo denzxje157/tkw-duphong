@@ -9,6 +9,13 @@ document.addEventListener('DOMContentLoaded', () => {
   initLayout('inventory');
   renderInventoryTable();
   setupEventListeners();
+
+  // Đăng ký nhận thông báo Realtime từ hệ thống
+  if (window.DB && typeof window.DB.onUpdate === 'function') {
+    window.DB.onUpdate(() => {
+      renderInventoryTable();
+    });
+  }
 });
 
 function setupEventListeners() {

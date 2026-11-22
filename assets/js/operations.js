@@ -13,6 +13,13 @@ document.addEventListener('DOMContentLoaded', () => {
   populateSelectOptions();
   setupCalculationListeners();
   checkQuickRestockParam();
+
+  // Đăng ký nhận thông báo Realtime từ hệ thống
+  if (window.DB && typeof window.DB.onUpdate === 'function') {
+    window.DB.onUpdate(() => {
+      populateSelectOptions();
+    });
+  }
 });
 
 // Chuyển đổi qua lại giữa Tab Nhập và Tab Xuất

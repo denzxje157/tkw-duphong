@@ -38,7 +38,11 @@ const DEFAULT_SEED_DATA = {
     { id: "LOG-20261120-01", timestamp: "2026-11-20T08:30:00.000Z", type: "IMPORT", itemId: "VT001", itemName: "Thép cuộn phi 10 Hòa Phát", changeQty: 5, balanceAfter: 12, price: 14500000, partnerName: "Công ty Cổ phần Tập đoàn Hòa Phát", reason: "Nhập định kỳ", operator: "Nguyễn Hoàng Anh" },
     { id: "LOG-20261121-02", timestamp: "2026-11-21T09:15:00.000Z", type: "EXPORT", itemId: "VT002", itemName: "Xi măng PCB40 Vicem Hoàng Thạch", changeQty: 20, balanceAfter: 0, price: 98000, partnerName: "Đội thi công số 3", reason: "Xuất đổ sàn tầng 2", operator: "Trần Thị Bình" },
     { id: "LOG-20261121-03", timestamp: "2026-11-21T14:40:00.000Z", type: "EXPORT", itemId: "VT003", itemName: "Dây cáp điện Cadivi 2x2.5", changeQty: 6, balanceAfter: 4, price: 880000, partnerName: "Tổ cơ điện M&E", reason: "Kéo dây trục kỹ thuật", operator: "Lê Hoàng Long" },
-    { id: "LOG-20261122-04", timestamp: "2026-11-22T08:10:00.000Z", type: "IMPORT", itemId: "VT007", itemName: "Aptomat 2P 32A Panasonic", changeQty: 30, balanceAfter: 60, price: 120000, partnerName: "Công ty Thiết bị điện Minh Tâm", reason: "Bổ sung an toàn thiết bị", operator: "Nguyễn Hoàng Anh" }
+    { id: "LOG-20261122-04", timestamp: "2026-11-22T08:10:00.000Z", type: "IMPORT", itemId: "VT007", itemName: "Aptomat 2P 32A Panasonic", changeQty: 30, balanceAfter: 60, price: 120000, partnerName: "Công ty Thiết bị điện Minh Tâm", reason: "Bổ sung an toàn thiết bị", operator: "Nguyễn Hoàng Anh" },
+    { id: "LOG-20261122-05", timestamp: "2026-11-22T09:30:00.000Z", type: "EXPORT", itemId: "VT005", itemName: "Gạch Ceramic 60x60 Viglacera", changeQty: 30, balanceAfter: 0, price: 210000, partnerName: "Công ty Xây dựng An Thịnh", reason: "Lát nền sảnh chính", operator: "Nguyễn Hoàng Anh" },
+    { id: "LOG-20261122-06", timestamp: "2026-11-22T10:15:00.000Z", type: "EXPORT", itemId: "VT006", itemName: "Sơn ngoại thất Dulux Weathershield", changeQty: 2, balanceAfter: 8, price: 2200000, partnerName: "Đội sơn bả số 2", reason: "Sơn dặm mặt ngoài", operator: "Trần Thị Bình" },
+    { id: "LOG-20261122-07", timestamp: "2026-11-22T11:00:00.000Z", type: "EXPORT", itemId: "VT009", itemName: "Que hàn Kim Tín KT-421 3.2mm", changeQty: 10, balanceAfter: 35, price: 195000, partnerName: "Xưởng kết cấu thép", reason: "Gia công khung giàn", operator: "Lê Hoàng Long" },
+    { id: "LOG-20261122-08", timestamp: "2026-11-22T13:20:00.000Z", type: "EXPORT", itemId: "VT001", itemName: "Thép cuộn phi 10 Hòa Phát", changeQty: 3, balanceAfter: 12, price: 16200000, partnerName: "Đội cốt thép móng", reason: "Đan thép đài móng", operator: "Nguyễn Hoàng Anh" }
   ]
 };
 
@@ -58,6 +62,26 @@ initDatabase();
 
 // ĐỐI TƯỢNG DB TOÀN CỤC CUNG CẤP CÁC API CHO TOÀN BỘ 6 TRANG
 window.DB = {
+  // --- HỆ THỐNG PHÁT & NHẬN TÍN HIỆU ĐỒNG BỘ REALTIME ---
+  notifyChange(action, payload) {
+    try {
+      window.dispatchEvent(new CustomEvent('db-updated', { detail: { action, payload, at: Date.now() } }));
+      localStorage.setItem('INVENTORY_SYNC_PULSE', Date.now().toString());
+    } catch (e) {
+      console.warn('Realtime sync notification error', e);
+    }
+  },
+
+  onUpdate(callback) {
+    if (typeof callback !== 'function') return;
+    window.addEventListener('db-updated', (e) => callback(e.detail));
+    window.addEventListener('storage', (e) => {
+      if (e.key === 'INVENTORY_SYNC_PULSE' || (e.key && e.key.startsWith('INVENTORY_'))) {
+        callback({ action: 'STORAGE_SYNC', key: e.key, at: Date.now() });
+      }
+    });
+  },
+
   // --- QUẢN LÝ VẬT TƯ (ITEMS) ---
   getItems() {
     try {
@@ -87,6 +111,7 @@ window.DB = {
       items.push(itemData);
     }
     localStorage.setItem(STORAGE_KEYS.ITEMS, JSON.stringify(items));
+    this.notifyChange('ITEM_SAVED', itemData);
     return itemData;
   },
 
@@ -99,6 +124,7 @@ window.DB = {
     }
     const filtered = items.filter(i => i.id !== id);
     localStorage.setItem(STORAGE_KEYS.ITEMS, JSON.stringify(filtered));
+    this.notifyChange('ITEM_DELETED', id);
     return { success: true, message: "Đã xóa vật tư thành công!" };
   },
 
@@ -152,12 +178,14 @@ window.DB = {
       suppliers.push(supplierData);
     }
     localStorage.setItem(STORAGE_KEYS.SUPPLIERS, JSON.stringify(suppliers));
+    this.notifyChange('SUPPLIER_SAVED', supplierData);
     return supplierData;
   },
 
   deleteSupplier(id) {
     const suppliers = this.getSuppliers().filter(s => s.id !== id);
     localStorage.setItem(STORAGE_KEYS.SUPPLIERS, JSON.stringify(suppliers));
+    this.notifyChange('SUPPLIER_DELETED', id);
     return true;
   },
 
@@ -180,6 +208,7 @@ window.DB = {
     };
     logs.unshift(newLog);
     localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(logs));
+    this.notifyChange('LOG_SAVED', newLog);
     return newLog;
   },
 
@@ -288,6 +317,7 @@ window.DB = {
       if (parsed.logs && Array.isArray(parsed.logs)) {
         localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(parsed.logs));
       }
+      this.notifyChange('BACKUP_RESTORED', null);
       return { success: true, message: "Khôi phục dữ liệu thành công!" };
     } catch (e) {
       return { success: false, message: "Dữ liệu JSON không hợp lệ: " + e.message };
@@ -298,6 +328,7 @@ window.DB = {
     localStorage.setItem(STORAGE_KEYS.ITEMS, JSON.stringify(DEFAULT_SEED_DATA.items));
     localStorage.setItem(STORAGE_KEYS.SUPPLIERS, JSON.stringify(DEFAULT_SEED_DATA.suppliers));
     localStorage.setItem(STORAGE_KEYS.LOGS, JSON.stringify(DEFAULT_SEED_DATA.logs));
+    this.notifyChange('RESET_DEFAULT', null);
     return true;
   },
 

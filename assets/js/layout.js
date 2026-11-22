@@ -48,9 +48,8 @@ function initLayout(activePageKey) {
         <div class="sidebar-footer">
           <div class="system-status">
             <span class="status-dot"></span>
-            <span>Kho Online • IoT Ready</span>
+            <span>Kho Online • IoT Realtime</span>
           </div>
-          <small class="version-tag">GitHub Pages Compatible</small>
         </div>
       </aside>
     `;
@@ -72,11 +71,18 @@ function initLayout(activePageKey) {
           </div>
         </div>
         <div class="header-right">
-          <!-- NÚT MỞ TRẠM QUÉT IOT NỔI BẬT TẠI HEADER (DỄ THẤY TRÊN MỌI TRANG) -->
+          <!-- NÚT MỞ TRẠM QUÉT IOT NỔI BẬT TẠI HEADER -->
           <button class="btn btn-primary btn-sm iot-scanner-trigger-btn" onclick="openIoTScannerModal()" title="Mở máy quét mã vạch giả lập IoT">
             <span class="iot-pulse-dot"></span>
             <span class="iot-btn-text">📷 Trạm Quét Barcode IoT</span>
+            <span class="iot-btn-text-mobile">📷 Quét</span>
           </button>
+
+          <!-- BADGE TRẠNG THÁI ĐỒNG BỘ REALTIME -->
+          <div class="realtime-badge" id="header-realtime-badge" title="Đồng bộ dữ liệu thời gian thực">
+            <span class="realtime-pulse-dot"></span>
+            <span class="realtime-badge-text">Realtime</span>
+          </div>
 
           <div class="warehouse-badge">
             <span>📍 <strong>Tổng kho A</strong></span>
@@ -92,6 +98,17 @@ function initLayout(activePageKey) {
         </div>
       </header>
     `;
+
+    // Lắng nghe cập nhật Realtime để nhấp nháy badge đồng bộ
+    if (window.DB && typeof window.DB.onUpdate === 'function') {
+      window.DB.onUpdate(() => {
+        const badge = document.getElementById('header-realtime-badge');
+        if (badge) {
+          badge.classList.add('synced');
+          setTimeout(() => badge.classList.remove('synced'), 1200);
+        }
+      });
+    }
 
     // Đồng hồ thời gian thực
     function updateClock() {

@@ -11,6 +11,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 2. Tải và render dữ liệu
   loadDashboardData();
+
+  // 3. Đăng ký nhận thông báo Realtime từ hệ thống
+  if (window.DB && typeof window.DB.onUpdate === 'function') {
+    window.DB.onUpdate(() => {
+      loadDashboardData();
+    });
+  }
 });
 
 function loadDashboardData() {
@@ -167,11 +174,14 @@ function renderRackHeatmap(items) {
 
     return `
       <div class="rack-cell ${statusClass}" onclick="quickRestock('${item.id}')" title="Kệ: ${item.location} - Nhấn để nhập hàng">
-        <div class="rack-code">📍 ${item.location || 'Kệ N/A'}</div>
+        <div class="rack-header-row">
+          <span class="rack-code">📍 ${item.location || 'Kệ N/A'}</span>
+          <span class="badge ${status.badgeClass} rack-badge">${status.label}</span>
+        </div>
         <div class="rack-item-name" title="${item.name}">${item.name}</div>
-        <div class="rack-qty">
-          <span>Tồn: <strong style="color:${status.colorHex};">${item.quantity}</strong> ${item.unit}</span>
-          <span style="font-size:10.5px; color:${status.colorHex}; font-weight:600;">${status.label}</span>
+        <div class="rack-qty-row">
+          <span class="rack-qty-label">Tồn kho:</span>
+          <span class="rack-qty-val"><strong style="color:${status.colorHex};">${item.quantity}</strong> ${item.unit}</span>
         </div>
       </div>
     `;
