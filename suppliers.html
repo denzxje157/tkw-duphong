@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Kho - Quản Lý Nhà Cung Cấp & Đối Tác</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+      <div id="header-container"></div>
+
+      <main class="page-content">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h3 class="card-title">🏢 Danh Bạ Nhà Cung Cấp & Đối Tác Cung Ứng</h3>
+              <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px;">Dữ liệu nhà cung cấp tại đây được tự động liên kết với phiếu Nhập Kho.</p>
+            </div>
+            <button class="btn btn-primary" onclick="openAddSupplierModal()">
+              ➕ Thêm Nhà Cung Cấp
+            </button>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Mã NCC</th>
+                  <th>Tên Công Ty / Doanh Nghiệp</th>
+                  <th>Số Điện Thoại</th>
+                  <th>Email</th>
+                  <th>Nhóm Hàng Cung Cấp</th>
+                  <th>Tổng Đã Mua (VNĐ)</th>
+                  <th>Đánh Giá</th>
+                  <th style="text-align: right;">Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="suppliers-table-body">
+                <!-- JS Render -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL THÊM / SỬA NHÀ CUNG CẤP -->
+  <div class="modal-overlay" id="supplier-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="sup-modal-title">Thêm Nhà Cung Cấp Mới</h3>
+        <button class="modal-close" onclick="closeSupplierModal()">&times;</button>
+      </div>
+      <form id="supplier-form" onsubmit="handleSaveSupplier(event)">
+        <div class="modal-body">
+          <input type="hidden" id="form-sup-id">
+
+          <div class="form-group">
+            <label class="form-label">Tên Doanh Nghiệp / Công Ty (*)</label>
+            <input type="text" id="form-sup-name" class="form-control" required placeholder="VD: Tập đoàn Hòa Phát...">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Số Điện Thoại (*)</label>
+              <!-- VALIDATION HTML5: regex pattern -->
+              <input type="tel" id="form-sup-phone" class="form-control" required pattern="[0-9]{10,11}" placeholder="02439876543">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Email Liên Hệ (*)</label>
+              <!-- VALIDATION HTML5: type email -->
+              <input type="email" id="form-sup-email" class="form-control" required placeholder="contact@company.com">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Địa Chỉ Trụ Sở / Kho Hàng</label>
+            <input type="text" id="form-sup-address" class="form-control" placeholder="Số nhà, đường, quận/huyện...">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Nhóm Hàng Cung Ứng Chính</label>
+              <input type="text" id="form-sup-categories" class="form-control" placeholder="VD: Sắt thép, Xi măng, Thiết bị điện...">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Độ Uy Tín</label>
+              <select id="form-sup-rating" class="form-control">
+                <option value="5">⭐⭐⭐⭐⭐ (5 sao)</option>
+                <option value="4">⭐⭐⭐⭐ (4 sao)</option>
+                <option value="3">⭐⭐⭐ (3 sao)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeSupplierModal()">Hủy Bỏ</button>
+          <button type="submit" class="btn btn-primary">Lưu Nhà Cung Cấp</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/js/db.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="assets/js/suppliers.js"></script>
+</body>
+</html>

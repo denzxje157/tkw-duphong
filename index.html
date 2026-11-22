@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Kho - Tổng Quan & Cảnh Báo Tồn Kho</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <!-- Sidebar component -->
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+      <!-- Header component -->
+      <div id="header-container"></div>
+
+      <main class="page-content">
+        <!-- 4 KPI CARDS -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <h4>Tổng Số Mặt Hàng</h4>
+              <div class="kpi-value" id="kpi-total-items">0</div>
+            </div>
+            <div class="kpi-icon kpi-blue">📦</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <h4>Giá Trị Tài Sản Kho</h4>
+              <div class="kpi-value" id="kpi-total-value">0 đ</div>
+            </div>
+            <div class="kpi-icon kpi-green">💰</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <h4>Báo Động: Hết Hàng</h4>
+              <div class="kpi-value" id="kpi-out-stock" style="color: var(--danger);">0</div>
+            </div>
+            <div class="kpi-icon kpi-red">🚨</div>
+          </div>
+
+          <div class="kpi-card">
+            <div class="kpi-info">
+              <h4>Cảnh Báo: Sắp Hết</h4>
+              <div class="kpi-value" id="kpi-low-stock" style="color: var(--warning);">0</div>
+            </div>
+            <div class="kpi-icon kpi-yellow">⚠️</div>
+          </div>
+        </div>
+
+        <!-- SƠ ĐỒ BẢN ĐỒ KỆ KHO THỜI GIAN THỰC (ĐƯA LÊN TRÊN ĐỂ DỄ QUAN SÁT) -->
+        <div class="card" style="margin-bottom: 20px;">
+          <div class="card-header" style="margin-bottom: 12px; padding-bottom: 8px;">
+            <div>
+              <h3 class="card-title">🗺️ Sơ Đồ Mặt Bằng Kệ Kho Thông Minh (IoT Rack Heatmap)</h3>
+              <p style="font-size: 12px; color: var(--text-muted); margin-top: 2px;">Trạng thái thời gian thực theo vị trí kệ (Bấm vào kệ để nhập hàng nhanh):</p>
+            </div>
+            <div style="display: flex; gap: 14px; font-size: 12px; align-items: center;">
+              <span><span style="display: inline-block; width: 10px; height: 10px; background: #10b981; border-radius: 2px; margin-right: 4px;"></span>Còn hàng</span>
+              <span><span style="display: inline-block; width: 10px; height: 10px; background: #f59e0b; border-radius: 2px; margin-right: 4px;"></span>Sắp hết</span>
+              <span><span style="display: inline-block; width: 10px; height: 10px; background: #ef4444; border-radius: 2px; margin-right: 4px;"></span>Hết hàng / Trống</span>
+            </div>
+          </div>
+          <div class="rack-grid" id="rack-heatmap-grid" style="margin-top: 8px;">
+            <!-- JS render các ô kệ hàng -->
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 20px; align-items: start;">
+          <!-- BẢNG CẢNH BÁO NGUY CẤP (THU NHỎ GỌN GÀNG, CÓ SCROLLBAR MƯỢT) -->
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header" style="margin-bottom: 12px; padding-bottom: 8px;">
+              <h3 class="card-title" style="font-size: 15px;">⚠️ Danh Sách Vật Tư Sắp Hết Hoặc Dưới Định Mức Tối Thiểu</h3>
+              <span class="badge badge-warning" id="warning-count-badge" style="font-size: 11px;">0 mục cần chú ý</span>
+            </div>
+            <div class="table-responsive" style="max-height: 275px; overflow-y: auto;">
+              <table class="table" style="font-size: 12.5px;">
+                <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 2;">
+                  <tr>
+                    <th>Mã SKU</th>
+                    <th>Tên Vật Tư</th>
+                    <th>Kệ</th>
+                    <th>Tồn Kho</th>
+                    <th>Định Mức</th>
+                    <th>Trạng Thái</th>
+                    <th style="text-align: right;">Thao Tác</th>
+                  </tr>
+                </thead>
+                <tbody id="urgent-table-body">
+                  <!-- Dữ liệu JS render -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- BIỂU ĐỒ TRÒN TỶ LỆ CƠ CẤU TỒN KHO (HTML5 CANVAS) -->
+          <div class="card" style="margin-bottom: 0;">
+            <div class="card-header" style="margin-bottom: 12px; padding-bottom: 8px;">
+              <h3 class="card-title" style="font-size: 15px;">📊 Phân Bổ Tồn Kho</h3>
+            </div>
+            <div style="text-align: center; padding: 4px 0;">
+              <canvas id="donutChart" width="200" height="200"></canvas>
+            </div>
+            <div style="margin-top: 10px; font-size: 12px; display: flex; flex-direction: column; gap: 6px;">
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span><span style="display: inline-block; width: 10px; height: 10px; background: #10b981; border-radius: 2px; margin-right: 6px;"></span>Còn hàng:</span>
+                <strong id="legend-in-stock">0</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span><span style="display: inline-block; width: 10px; height: 10px; background: #f59e0b; border-radius: 2px; margin-right: 6px;"></span>Sắp hết:</span>
+                <strong id="legend-low-stock">0</strong>
+              </div>
+              <div style="display: flex; justify-content: space-between; align-items: center;">
+                <span><span style="display: inline-block; width: 10px; height: 10px; background: #ef4444; border-radius: 2px; margin-right: 6px;"></span>Hết hàng:</span>
+                <strong id="legend-out-stock">0</strong>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="assets/js/db.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="assets/js/index.js"></script>
+</body>
+</html>

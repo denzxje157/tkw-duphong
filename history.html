@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Kho - Dòng Thời Gian Lịch Sử Giao Dịch</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+      <div id="header-container"></div>
+
+      <main class="page-content">
+        <div class="card">
+          <!-- BỘ LỌC LỊCH SỬ CHUYÊN SÂU -->
+          <div style="display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr auto; gap: 12px; margin-bottom: 20px; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">🔍 Tìm theo Tên vật tư / Mã phiếu / Người lập</label>
+              <input type="text" id="filter-keyword" class="form-control" placeholder="Nhập từ khóa...">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Loại giao dịch</label>
+              <select id="filter-type" class="form-control">
+                <option value="">-- Tất cả loại --</option>
+                <option value="IMPORT">Nhập kho (+)</option>
+                <option value="EXPORT">Xuất kho (-)</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Từ ngày</label>
+              <input type="date" id="filter-from-date" class="form-control">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Đến ngày</label>
+              <input type="date" id="filter-to-date" class="form-control">
+            </div>
+
+            <div>
+              <button class="btn btn-outline" onclick="exportHistoryCSV()">
+                📥 Xuất File CSV (Excel)
+              </button>
+            </div>
+          </div>
+
+          <!-- THỐNG KÊ NHANH TRONG KỲ LỌC -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 20px; background: #f8fafc; padding: 12px 16px; border-radius: 8px; border: 1px solid var(--border-color); font-size: 13px;">
+            <div>Tổng số phiếu: <strong id="stat-total-count">0</strong> phiếu</div>
+            <div>Tổng tiền nhập: <strong id="stat-import-val" style="color: var(--success);">0 đ</strong></div>
+            <div>Tổng tiền xuất: <strong id="stat-export-val" style="color: var(--danger);">0 đ</strong></div>
+          </div>
+
+          <!-- DÒNG THỜI GIAN (VERTICAL TIMELINE) & BẢNG ĐỐI SOÁT -->
+          <div class="card-header" style="margin-top: 10px;">
+            <h3 class="card-title">📜 Nhật Ký Luân Chuyển Hàng Hóa Theo Thời Gian</h3>
+            <div style="display: flex; align-items: center; gap: 12px;">
+              <span id="log-count-badge" class="badge badge-info">0 giao dịch</span>
+              <div class="view-toggle-group">
+                <button type="button" class="view-toggle-btn active" id="btn-view-timeline" onclick="switchHistoryView('timeline')">
+                  📅 Dạng Timeline
+                </button>
+                <button type="button" class="view-toggle-btn" id="btn-view-table" onclick="switchHistoryView('table')">
+                  📋 Dạng Bảng Đối Soát
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- CHẾ ĐỘ 1: TIMELINE TRỰC QUAN -->
+          <div class="timeline" id="timeline-container">
+            <!-- JS Render Timeline Items -->
+          </div>
+
+          <!-- CHẾ ĐỘ 2: BẢNG ĐỐI SOÁT CHI TIẾT -->
+          <div id="table-view-container" class="table-responsive" style="display: none;">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Mã Phiếu</th>
+                  <th>Thời Gian</th>
+                  <th>Loại</th>
+                  <th>Mặt Hàng</th>
+                  <th>Biến Động</th>
+                  <th>Tồn Sau GD</th>
+                  <th>Đơn Giá</th>
+                  <th>Đối Tác</th>
+                  <th>Người Lập</th>
+                </tr>
+              </thead>
+              <tbody id="history-table-body">
+                <!-- JS Render Table Rows -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="assets/js/db.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="assets/js/history.js"></script>
+</body>
+</html>

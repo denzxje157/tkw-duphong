@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Kho - Quản Lý Danh Mục Vật Tư</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+      <div id="header-container"></div>
+
+      <main class="page-content">
+        <!-- BANNER TRẠM QUÉT IOT SIÊU NỔI BẬT DỄ DEMO -->
+        <div class="card" style="background: linear-gradient(135deg, #0f172a, #1e293b); color: #fff; border: 1px solid #38bdf8; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.2);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+            <div style="display: flex; align-items: center; gap: 14px;">
+              <div style="width: 48px; height: 48px; background: rgba(56, 189, 248, 0.15); border: 1px solid #38bdf8; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 24px;">
+                📷
+              </div>
+              <div>
+                <div style="display: flex; align-items: center; gap: 8px;">
+                  <h3 style="font-size: 16px; margin: 0; color: #fff;">TRẠM QUÉT MÃ VẠCH IOT THỜI GIAN THỰC</h3>
+                  <span class="badge" style="background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid #10b981; font-size: 11px;">
+                    <span class="iot-pulse-dot" style="margin-right: 4px;"></span> Online Ready
+                  </span>
+                </div>
+                <p style="font-size: 12.5px; color: #94a3b8; margin-top: 4px;">
+                  Bấm một nút bên dưới để "Bắn mã quét mẫu" hoặc mở Trạm Laser toàn màn hình:
+                </p>
+              </div>
+            </div>
+
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+              <button class="btn btn-sm" style="background: #1e293b; color: #38bdf8; border: 1px solid #38bdf8;" onclick="triggerScanItem('8931234567890')">
+                🔫 Bắn mã: Thép Hòa Phát
+              </button>
+              <button class="btn btn-sm" style="background: #1e293b; color: #f87171; border: 1px solid #f87171;" onclick="triggerScanItem('8931234567891')">
+                🔫 Bắn mã: Xi măng Vicem (Tồn: 0)
+              </button>
+              <button class="btn btn-sm" style="background: #1e293b; color: #fbbf24; border: 1px solid #fbbf24;" onclick="triggerScanItem('8931234567892')">
+                🔫 Bắn mã: Cáp Cadivi
+              </button>
+              <button class="btn btn-primary btn-sm" onclick="openIoTScannerModal()">
+                ⚡ Mở Trạm Laser Chi Tiết
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <!-- BỘ LỌC VÀ TÌM KIẾM TỨC THỜI (LIVE SEARCH) -->
+          <div style="display: grid; grid-template-columns: 2fr 1.2fr 1fr 1fr auto; gap: 12px; margin-bottom: 20px; align-items: end;">
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">🔍 Tìm kiếm nhanh (Tên, Mã SKU, Vị trí)</label>
+              <input type="text" id="search-input" class="form-control" placeholder="Nhập từ khóa tìm kiếm...">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">📷 Quét mã vạch (Enter)</label>
+              <input type="text" id="barcode-input" class="form-control" placeholder="Quét / Nhập mã và Enter...">
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Kho lưu trữ</label>
+              <select id="filter-warehouse" class="form-control">
+                <option value="">-- Tất cả kho --</option>
+                <option value="Kho A - Tổng kho">Kho A - Tổng kho</option>
+                <option value="Kho B - Chi nhánh 1">Kho B - Chi nhánh 1</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin-bottom: 0;">
+              <label class="form-label">Trạng thái tồn</label>
+              <select id="filter-status" class="form-control">
+                <option value="">-- Tất cả trạng thái --</option>
+                <option value="OUT">Hết hàng (Đỏ)</option>
+                <option value="LOW">Sắp hết (Vàng)</option>
+                <option value="IN_STOCK">Còn hàng (Xanh)</option>
+              </select>
+            </div>
+
+            <div>
+              <button class="btn btn-primary" onclick="openAddModal()">
+                ➕ Thêm Vật Tư Mới
+              </button>
+            </div>
+          </div>
+
+          <!-- BẢNG DANH MỤC HÀNG HÓA -->
+          <div class="table-responsive">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Mã SKU / Barcode</th>
+                  <th>Tên Vật Tư</th>
+                  <th>Danh Mục</th>
+                  <th>Kho Lưu Trữ</th>
+                  <th>Đơn Vị</th>
+                  <th>Tồn Kho</th>
+                  <th>Định Mức Min</th>
+                  <th>Giá Xuất</th>
+                  <th>Vị Trí</th>
+                  <th>Trạng Thái</th>
+                  <th style="text-align: right;">Thao Tác</th>
+                </tr>
+              </thead>
+              <tbody id="inventory-table-body">
+                <!-- JS Render -->
+              </tbody>
+            </table>
+          </div>
+          <div style="margin-top: 15px; font-size: 13px; color: var(--text-muted); display: flex; justify-content: space-between;">
+            <span id="record-count-text">Hiển thị 0 vật tư</span>
+            <span>* Chú thích: Chỉ cho phép xóa vật tư khi Tồn kho = 0</span>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL THÊM / SỬA VẬT TƯ (HTML5 VALIDATION) -->
+  <div class="modal-overlay" id="item-modal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title" id="modal-title">Thêm Vật Tư Mới</h3>
+        <button class="modal-close" onclick="closeModal()">&times;</button>
+      </div>
+      <form id="item-form" onsubmit="handleSaveItem(event)">
+        <div class="modal-body">
+          <input type="hidden" id="form-item-id">
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Mã SKU (*)</label>
+              <input type="text" id="form-sku" class="form-control" placeholder="Tự sinh nếu để trống">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Mã vạch Barcode (*)</label>
+              <input type="text" id="form-barcode" class="form-control" required placeholder="VD: 8931234567890">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tên Vật Tư (*)</label>
+            <input type="text" id="form-name" class="form-control" required placeholder="Nhập tên vật tư...">
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Danh Mục</label>
+              <select id="form-category" class="form-control" required>
+                <option value="Vật liệu xây dựng">Vật liệu xây dựng</option>
+                <option value="Thiết bị điện">Thiết bị điện</option>
+                <option value="Vật tư cấp thoát nước">Vật tư cấp thoát nước</option>
+                <option value="Vật liệu hoàn thiện">Vật liệu hoàn thiện</option>
+                <option value="Sơn & Hóa chất">Sơn & Hóa chất</option>
+                <option value="Cơ khí & Kim khí">Cơ khí & Kim khí</option>
+                <option value="Thiết bị chiếu sáng">Thiết bị chiếu sáng</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Kho Lưu Trữ</label>
+              <select id="form-warehouse" class="form-control" required>
+                <option value="Kho A - Tổng kho">Kho A - Tổng kho</option>
+                <option value="Kho B - Chi nhánh 1">Kho B - Chi nhánh 1</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Đơn Vị Tính</label>
+              <input type="text" id="form-unit" class="form-control" required placeholder="Bao, Cây, Cuộn...">
+            </div>
+            <!-- SỬ DỤNG MIN/MAX THEO ĐÚNG ĐỀ BÀI HTML5 -->
+            <div class="form-group">
+              <label class="form-label">Số Lượng Tồn Ban Đầu</label>
+              <input type="number" id="form-quantity" class="form-control" min="0" step="1" required value="0">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Định Mức Tối Thiểu (Min)</label>
+              <input type="number" id="form-min" class="form-control" min="0" step="1" required value="10">
+            </div>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+            <div class="form-group">
+              <label class="form-label">Giá Nhập (VNĐ)</label>
+              <input type="number" id="form-price-import" class="form-control" min="0" step="1000" required value="100000">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Giá Xuất (VNĐ)</label>
+              <input type="number" id="form-price-export" class="form-control" min="0" step="1000" required value="120000">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Vị Trí Kệ / Ô Chứa</label>
+            <input type="text" id="form-location" class="form-control" placeholder="VD: Kệ A1-02">
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-outline" onclick="closeModal()">Hủy Bỏ</button>
+          <button type="submit" class="btn btn-primary">Lưu Vật Tư</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script src="assets/js/db.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="assets/js/inventory.js"></script>
+</body>
+</html>

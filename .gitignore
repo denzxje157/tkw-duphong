@@ -1,0 +1,15 @@
+# OS and Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Temp files and Office locks
+~$*
+*.tmp
+
+# Python cache & build helper
+__pycache__/
+*.pyc
+update_docx_with_repo.py
+check_ids.js

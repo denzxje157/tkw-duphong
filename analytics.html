@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Kho - Báo Cáo & Phân Tích Dữ Liệu</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+      <div id="header-container"></div>
+
+      <main class="page-content">
+        <!-- SAO LƯU & KHÔI PHỤC DỮ LIỆU (JSON BACKUP / RESTORE) -->
+        <div class="card" style="background: linear-gradient(to right, #ffffff, #f0fdf4); border-left: 4px solid var(--success);">
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+            <div>
+              <h4 style="font-size: 15px; font-weight: 700; color: #065f46;">💾 Quản Lý Dữ Liệu & Sao Lưu (Data Safety & Test Mocking)</h4>
+              <p style="font-size: 12.5px; color: var(--text-muted); margin-top: 4px;">Xuất toàn bộ hệ thống kho ra file .json hoặc nạp dữ liệu kiểm thử nhanh chóng.</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+              <button class="btn btn-primary btn-sm" onclick="DB.exportBackup()">
+                📥 Tải Bản Sao Lưu (.json)
+              </button>
+              <label class="btn btn-outline btn-sm" style="margin-bottom:0; cursor:pointer;">
+                📤 Khôi Phục Từ File (.json)
+                <input type="file" id="restore-file-input" accept=".json" style="display:none;" onchange="handleRestoreFile(event)">
+              </label>
+              <button class="btn btn-outline btn-sm" onclick="handleResetDefault()" style="color:var(--danger);">
+                🔄 Reset Dữ Liệu Gốc
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2 BIỂU ĐỒ CANVAS PHÂN TÍCH -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 24px;">
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📊 Tương Quan Giá Trị Nhập & Xuất Kho</h3>
+            </div>
+            <div style="height: 240px; position: relative;">
+              <canvas id="barCompareChart" width="400" height="240"></canvas>
+            </div>
+            <div id="chart-summary-text" style="font-size: 12.5px; color: var(--text-muted); margin-top: 10px; text-align: center;"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">🔥 Top Vật Tư Luân Chuyển Nhanh Nhất (Fast Moving)</h3>
+            </div>
+            <div style="height: 240px; position: relative;">
+              <canvas id="topItemsChart" width="400" height="240"></canvas>
+            </div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 10px; text-align: center;">Xếp hạng dựa trên tổng số lượng xuất kho</div>
+          </div>
+        </div>
+
+        <!-- 2 KHỐI DỰ BÁO BIG DATA & HÀNG TỒN ĐỌNG (TẦM NHÌN DÀI HẠN) -->
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+          <!-- DỰ BÁO CẠN KHO -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">⏳ Dự Báo Chu Kỳ Cạn Kho (Predictive Run-out)</h3>
+              <span class="badge badge-warning">Thuật toán AI/BigData</span>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px;">Ước tính số ngày còn lại trước khi hết hàng dựa trên tốc độ tiêu thụ:</p>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Vật Tư</th>
+                    <th>Tồn Kho</th>
+                    <th>Tốc Độ Tiêu Thụ</th>
+                    <th>Dự Kiến Cạn Kho</th>
+                  </tr>
+                </thead>
+                <tbody id="predictive-table-body">
+                  <!-- JS Render -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- BÁO CÁO HÀNG TỒN ĐỌNG -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">📦 Cảnh Báo Hàng Tồn Đọng (Dead Stock)</h3>
+              <span class="badge badge-danger">Cần thanh lý</span>
+            </div>
+            <p style="font-size: 12.5px; color: var(--text-muted); margin-bottom: 12px;">Các mặt hàng trên 30 ngày chưa phát sinh giao dịch xuất kho:</p>
+            <div class="table-responsive">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Vật Tư</th>
+                    <th>Vị Trí</th>
+                    <th>Tồn Kho</th>
+                    <th>Giá Trị Đọng</th>
+                    <th>Đề Xuất</th>
+                  </tr>
+                </thead>
+                <tbody id="deadstock-table-body">
+                  <!-- JS Render -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="assets/js/db.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="assets/js/analytics.js"></script>
+</body>
+</html>

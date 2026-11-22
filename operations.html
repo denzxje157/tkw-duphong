@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Kho - Điều Phối Nhập & Xuất Kho</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <div class="app-layout">
+    <div id="sidebar-container"></div>
+
+    <div class="app-main">
+      <div id="header-container"></div>
+
+      <main class="page-content">
+        <!-- TAB CHỌN NHẬP KHO HOẶC XUẤT KHO -->
+        <div class="card" style="max-width: 820px; margin: 0 auto;">
+          <div class="tab-nav">
+            <button class="tab-btn active" id="btn-tab-import" onclick="switchTab('import')">
+              📥 Tạo Phiếu Nhập Kho (Goods Receipt)
+            </button>
+            <button class="tab-btn" id="btn-tab-export" onclick="switchTab('export')">
+              📤 Tạo Phiếu Xuất Kho (Goods Issue)
+            </button>
+          </div>
+
+          <!-- TAB 1: FORM NHẬP KHO -->
+          <div class="tab-pane active" id="pane-import">
+            <form id="form-import" onsubmit="handleImportSubmit(event)">
+              <div class="form-group">
+                <label class="form-label">Chọn Vật Tư Cần Nhập (*)</label>
+                <select id="import-item-select" class="form-control" required onchange="onImportItemChange()">
+                  <option value="">-- Chọn mặt hàng trong danh mục --</option>
+                </select>
+              </div>
+
+              <div id="import-item-preview" style="display:none; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 6px; padding: 12px; margin-bottom: 16px; font-size: 13px;">
+                <!-- Preview thông tin tồn hiện tại -->
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Nhà Cung Cấp Đối Tác (*)</label>
+                <select id="import-supplier-select" class="form-control" required>
+                  <option value="">-- Chọn nhà cung cấp liên kết --</option>
+                </select>
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                <div class="form-group">
+                  <label class="form-label">Số Lượng Nhập (*)</label>
+                  <!-- THUỘC TÍNH HTML5: min="1" -->
+                  <input type="number" id="import-quantity" class="form-control" min="1" step="1" required placeholder="Nhập số lượng...">
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Đơn Giá Nhập (VNĐ) (*)</label>
+                  <input type="number" id="import-price" class="form-control" min="0" step="1000" required placeholder="Giá nhập...">
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Tổng Chi Phí Phiếu Tạm Tính</label>
+                <div id="import-total-calc" style="font-size: 18px; font-weight: 700; color: var(--primary);">0 đ</div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Lý Do / Mục Đích Nhập</label>
+                <input type="text" id="import-reason" class="form-control" placeholder="VD: Nhập bổ sung tồn an toàn...">
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+                <button type="reset" class="btn btn-outline">Làm Lại</button>
+                <button type="submit" class="btn btn-success" id="btn-submit-import">
+                  ✔ Xác Nhận Nhập Kho
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <!-- TAB 2: FORM XUẤT KHO (TRỌNG TÂM CHẤM ĐIỂM LOGIC & MIN/MAX) -->
+          <div class="tab-pane" id="pane-export">
+            <form id="form-export" onsubmit="handleExportSubmit(event)">
+              <div class="form-group">
+                <label class="form-label">Chọn Vật Tư Xuất Kho (*)</label>
+                <select id="export-item-select" class="form-control" required onchange="onExportItemChange()">
+                  <option value="">-- Chọn mặt hàng muốn xuất --</option>
+                </select>
+              </div>
+
+              <!-- THÔNG BÁO TỒN HIỆN CÓ CỰC KỲ TRỰC QUAN -->
+              <div id="export-stock-notice" style="display:none; padding: 14px; border-radius: 8px; margin-bottom: 18px; font-size: 13.5px;">
+                <!-- JS Render -->
+              </div>
+
+              <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+                <div class="form-group">
+                  <label class="form-label">
+                    Số Lượng Xuất (*) 
+                    <span id="max-hint" style="color: var(--text-muted); font-weight: normal;"></span>
+                  </label>
+                  <!-- THUỘC TÍNH HTML5: min="1" VÀ max động do JS gán -->
+                  <input type="number" id="export-quantity" class="form-control" min="1" step="1" required placeholder="Nhập số lượng xuất..." oninput="validateExportQuantity()">
+                  <!-- CẢNH BÁO LỖI HTML5 / JS -->
+                  <div class="invalid-feedback" id="export-error-msg">
+                    ⚠️ Lỗi: Số lượng xuất vượt quá tồn kho khả dụng! Vui lòng điều chỉnh lại.
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Lý Do Xuất Hàng</label>
+                  <select id="export-reason" class="form-control" required>
+                    <option value="Xuất phục vụ sản xuất / thi công">Xuất phục vụ sản xuất / thi công</option>
+                    <option value="Xuất bán thương mại">Xuất bán thương mại</option>
+                    <option value="Xuất điều chuyển giữa các kho">Xuất điều chuyển giữa các kho</option>
+                    <option value="Xuất thanh lý hàng hỏng hóc">Xuất thanh lý hàng hỏng hóc</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Đơn Vị Tiếp Nhận / Người Nhận (*)</label>
+                <input type="text" id="export-partner" class="form-control" required placeholder="VD: Đội thi công số 1, Khách hàng Minh Khang...">
+              </div>
+
+              <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 24px;">
+                <button type="reset" class="btn btn-outline" onclick="resetExportForm()">Làm Lại</button>
+                <!-- NÚT BẤM SẼ BỊ CHẶN (DISABLED) NẾU XUẤT QUÁ TỒN KHO -->
+                <button type="submit" class="btn btn-danger" id="btn-submit-export">
+                  🚀 Xác Nhận Xuất Kho
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <!-- MODAL IN PHIẾU XUẤT / NHẬP KHO CHUẨN KẾ TOÁN (PRINTABLE VOUCHER) -->
+  <div class="modal-overlay" id="voucher-modal">
+    <div class="modal-box voucher-modal-box">
+      <div id="voucher-printable-area" class="voucher-paper">
+        <!-- JS render mẫu phiếu in -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-outline" onclick="closeVoucherModal()">Đóng</button>
+        <button type="button" class="btn btn-primary" onclick="printVoucher()">
+          🖨️ In Phiếu (Print)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/db.js"></script>
+  <script src="assets/js/layout.js"></script>
+  <script src="assets/js/operations.js"></script>
+</body>
+</html>
